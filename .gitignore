@@ -59,8 +59,8 @@ venv.bak/
 
 # Local Vectra Application Logs
 .vectra/
-pdf_functions.txt
 
 # OS metadata
 .DS_Store
 Thumbs.db
+

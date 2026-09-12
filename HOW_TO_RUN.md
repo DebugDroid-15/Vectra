@@ -101,3 +101,4 @@ If an unexpected crash or warning occurs:
 - Alternatively, check the log files located in your user directory:
   - Windows: `%USERPROFILE%\.vectra\logs\vectra_app.log`
   - Linux/macOS: `~/.vectra/logs/vectra_app.log`
+
