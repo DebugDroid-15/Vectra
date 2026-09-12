@@ -8,75 +8,115 @@ echo =========================================================================
 echo Launching Vectra... Please wait.
 echo.
 
-:: 1. Activate virtual environment if present in root
-if exist ".venv\Scripts\activate.bat" (
-    call .venv\Scripts\activate.bat
-    set "PYTHON_EXE=python"
-    goto :PYTHON_FOUND
+set "PYTHON_EXE="
+
+:: 1. Check local virtual environment (.venv)
+if exist ".venv\Scripts\python.exe" (
+    set "PYTHON_EXE=.venv\Scripts\python.exe"
+    echo [INFO] Found local virtual environment at .venv
+    goto :FOUND
 )
 
-:: 2. Test py launcher
-py --version >nul 2>&1
-if %errorlevel% equ 0 (
+:: 2. Try 'py' launcher (standard Windows Python launcher installed with official Python)
+py -c "import sys; print(sys.version)" >nul 2>&1
+if !errorlevel! equ 0 (
     set "PYTHON_EXE=py"
-    goto :PYTHON_FOUND
+    echo [INFO] Detected Python via Windows 'py' launcher
+    goto :FOUND
 )
 
-:: 3. Test python executable (verifying it is NOT the Microsoft Store stub)
+:: 3. Try system 'python' command (ensuring it's not the Windows Store 0-byte stub)
 python -c "import sys; print(sys.version)" >nul 2>&1
-if %errorlevel% equ 0 (
+if !errorlevel! equ 0 (
     set "PYTHON_EXE=python"
-    goto :PYTHON_FOUND
+    echo [INFO] Detected Python from system PATH
+    goto :FOUND
 )
 
-:: 4. Search common Windows installation paths
-if exist "%LocalAppData%\Programs\Python\Python311\python.exe" (
-    set "PYTHON_EXE=%LocalAppData%\Programs\Python\Python311\python.exe"
-    goto :PYTHON_FOUND
-)
-if exist "%LocalAppData%\Programs\Python\Python312\python.exe" (
-    set "PYTHON_EXE=%LocalAppData%\Programs\Python\Python312\python.exe"
-    goto :PYTHON_FOUND
-)
-if exist "%LocalAppData%\Programs\Python\Python310\python.exe" (
-    set "PYTHON_EXE=%LocalAppData%\Programs\Python\Python310\python.exe"
-    goto :PYTHON_FOUND
-)
-if exist "C:\Python311\python.exe" (
-    set "PYTHON_EXE=C:\Python311\python.exe"
-    goto :PYTHON_FOUND
-)
-if exist "C:\Python312\python.exe" (
-    set "PYTHON_EXE=C:\Python312\python.exe"
-    goto :PYTHON_FOUND
+:: 4. Try system 'python3' command
+python3 -c "import sys; print(sys.version)" >nul 2>&1
+if !errorlevel! equ 0 (
+    set "PYTHON_EXE=python3"
+    echo [INFO] Detected python3 from system PATH
+    goto :FOUND
 )
 
-:PYTHON_NOT_FOUND
+:: 5. Auto-scan all standard Python installation directories across user profile & system drives
+for /d %%D in ("%LocalAppData%\Programs\Python\Python*") do (
+    if exist "%%D\python.exe" (
+        "%%D\python.exe" -c "import sys; print(sys.version)" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=%%D\python.exe"
+            echo [INFO] Detected Python at %%D\python.exe
+            goto :FOUND
+        )
+    )
+)
+
+for /d %%D in ("C:\Python*") do (
+    if exist "%%D\python.exe" (
+        "%%D\python.exe" -c "import sys; print(sys.version)" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=%%D\python.exe"
+            echo [INFO] Detected Python at %%D\python.exe
+            goto :FOUND
+        )
+    )
+)
+
+for /d %%D in ("C:\Program Files\Python*") do (
+    if exist "%%D\python.exe" (
+        "%%D\python.exe" -c "import sys; print(sys.version)" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=%%D\python.exe"
+            echo [INFO] Detected Python at %%D\python.exe
+            goto :FOUND
+        )
+    )
+)
+
+for /d %%D in ("%ProgramFiles%\Python*") do (
+    if exist "%%D\python.exe" (
+        "%%D\python.exe" -c "import sys; print(sys.version)" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=%%D\python.exe"
+            echo [INFO] Detected Python at %%D\python.exe
+            goto :FOUND
+        )
+    )
+)
+
+for /d %%D in ("%ProgramData%\Anaconda3*" "%ProgramData%\Miniconda3*" "%UserProfile%\Anaconda3*" "%UserProfile%\Miniconda3*") do (
+    if exist "%%D\python.exe" (
+        "%%D\python.exe" -c "import sys; print(sys.version)" >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=%%D\python.exe"
+            echo [INFO] Detected Python Conda environment at %%D\python.exe
+            goto :FOUND
+        )
+    )
+)
+
+:NOT_FOUND
 echo =========================================================================
-echo [ERROR] Real Python executable was not found on your system!
+echo [ERROR] No working Python installation was found on this system!
 echo =========================================================================
-echo Windows redirected to the Microsoft Store stub ("Python was not found").
 echo.
-echo TO FIX THIS:
-echo 1. Download & Install Python 3.10+ from: https://www.python.org/downloads/
-echo 2. IMPORTANT: Check "Add python.exe to PATH" during installation!
-echo 3. Disable Microsoft Store Aliases in:
-echo    Start -> Settings -> Apps -> Advanced app settings -> App execution aliases
-echo    (Turn OFF "App Installer: python.exe" and "python3.exe")
-echo =========================================================================
+echo Windows requires Python to be installed. Please install Python 3.10+:
+echo 1. Download Python from: https://www.python.org/downloads/
+echo 2. Check the box "Add python.exe to PATH" during installation!
 echo.
 pause
 exit /b 9009
 
-:PYTHON_FOUND
-:: Install/Verify dependencies silently
-echo [1/2] Verifying dependencies...
+:FOUND
+echo =========================================================================
+echo [1/2] Verifying and installing required packages...
 "%PYTHON_EXE%" -m pip install -q --disable-pip-version-check -e .
 if %errorlevel% neq 0 (
-    echo [WARNING] Automatic dependency check reported non-zero status. Attempting launch...
+    echo [WARNING] Package installation returned non-zero code. Attempting to launch anyway...
 )
 
-:: Launch Vectra Desktop IDE
 echo [2/2] Starting Vectra Desktop IDE...
 echo =========================================================================
 echo.
@@ -85,7 +125,7 @@ echo.
 
 if %errorlevel% neq 0 (
     echo.
-    echo [ERROR] Vectra exited with code: %errorlevel%
-    echo Check log records in: %USERPROFILE%\.vectra\logs\vectra_app.log
+    echo [ERROR] Vectra exited with error code: %errorlevel%
+    echo Log file created at: %USERPROFILE%\.vectra\logs\vectra_app.log
     pause
 )
