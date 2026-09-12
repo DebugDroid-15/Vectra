@@ -100,17 +100,17 @@ exit /b 9009
 
 :CREATE_VENV
 echo [1/3] Creating isolated virtual environment (.venv)...
-"%SYS_PYTHON%" -m venv --clear .venv
+"%SYS_PYTHON%" -m venv --clear --without-pip .venv
 if !errorlevel! neq 0 (
-    echo [WARNING] Could not create virtual environment. Running with system Python...
-    set "PYTHON_EXE=%SYS_PYTHON%"
-    goto :INSTALL_DEPS
+    "%SYS_PYTHON%" -m venv --clear .venv
 )
 set "PYTHON_EXE=.venv\Scripts\python.exe"
+"%SYS_PYTHON%" -m ensurepip --default-pip >nul 2>&1
+"%PYTHON_EXE%" -m ensurepip --default-pip >nul 2>&1
 
 :INSTALL_DEPS
 echo [2/3] Verifying and installing required packages...
-"%PYTHON_EXE%" -m pip install --upgrade pip >nul 2>&1
+"%PYTHON_EXE%" -m pip install -q --disable-pip-version-check --force-reinstall PySide6
 "%PYTHON_EXE%" -m pip install -q --disable-pip-version-check -e .
 if %errorlevel% neq 0 (
     echo [WARNING] Package installation returned non-zero code. Attempting to launch anyway...
