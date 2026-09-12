@@ -1,5 +1,20 @@
 import sys
 import os
+
+# Fix Conda / Windows DLL loading conflict for PySide6
+if sys.platform == "win32":
+    try:
+        import PySide6
+        pyside_dir = os.path.dirname(PySide6.__file__)
+        if hasattr(os, "add_dll_directory"):
+            os.add_dll_directory(pyside_dir)
+            plugins_dir = os.path.join(pyside_dir, "plugins")
+            if os.path.exists(plugins_dir):
+                os.add_dll_directory(plugins_dir)
+        os.environ["PATH"] = pyside_dir + os.pathsep + os.environ.get("PATH", "")
+    except Exception:
+        pass
+
 from PySide6.QtWidgets import QSplashScreen, QApplication, QLabel, QVBoxLayout, QWidget
 from PySide6.QtGui import QPixmap, QIcon, QFont, QColor
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QObject
