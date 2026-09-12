@@ -1,25 +1,36 @@
 import sys
 import os
 
-# Fix Conda / Windows DLL loading conflict for PySide6
+# 1. Initialize logging & crash handling early to capture module load errors
+try:
+    from ..logger import setup_logging, install_crash_handler, get_logger
+    install_crash_handler()
+    logger = get_logger("gui.app")
+    logger.info("Initializing Vectra GUI application...")
+except Exception:
+    pass
+
+# 2. Fix Conda / Windows DLL loading conflict for PySide6
 if sys.platform == "win32":
     try:
         import PySide6
         pyside_dir = os.path.dirname(PySide6.__file__)
+        # Add PySide6 directory to top of DLL search paths
         if hasattr(os, "add_dll_directory"):
             os.add_dll_directory(pyside_dir)
             plugins_dir = os.path.join(pyside_dir, "plugins")
             if os.path.exists(plugins_dir):
                 os.add_dll_directory(plugins_dir)
-        os.environ["PATH"] = pyside_dir + os.pathsep + os.environ.get("PATH", "")
-    except Exception:
-        pass
+        # Prepend PySide6 directory to system PATH to override Anaconda's Library\bin DLLs
+        os.environ["PATH"] = pyside_dir + os.pathsep + os.path.join(pyside_dir, "plugins", "platforms") + os.pathsep + os.environ.get("PATH", "")
+    except Exception as e:
+        if 'logger' in locals():
+            logger.warning(f"Could not configure PySide6 DLL directory: {e}")
 
 from PySide6.QtWidgets import QSplashScreen, QApplication, QLabel, QVBoxLayout, QWidget
 from PySide6.QtGui import QPixmap, QIcon, QFont, QColor
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QObject
 from .main_window import MainWindow
-from ..logger import setup_logging, install_crash_handler, get_logger
 
 class FadeSplashScreen(QSplashScreen):
     def __init__(self, pixmap):

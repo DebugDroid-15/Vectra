@@ -100,7 +100,7 @@ exit /b 9009
 
 :CREATE_VENV
 echo [1/3] Creating isolated virtual environment (.venv)...
-"%SYS_PYTHON%" -m venv .venv
+"%SYS_PYTHON%" -m venv --clear .venv
 if !errorlevel! neq 0 (
     echo [WARNING] Could not create virtual environment. Running with system Python...
     set "PYTHON_EXE=%SYS_PYTHON%"
@@ -110,6 +110,7 @@ set "PYTHON_EXE=.venv\Scripts\python.exe"
 
 :INSTALL_DEPS
 echo [2/3] Verifying and installing required packages...
+"%PYTHON_EXE%" -m pip install --upgrade pip >nul 2>&1
 "%PYTHON_EXE%" -m pip install -q --disable-pip-version-check -e .
 if %errorlevel% neq 0 (
     echo [WARNING] Package installation returned non-zero code. Attempting to launch anyway...
