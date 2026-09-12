@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vectra"
+version = "1.0.0"
+description = "Vectra — Extensible open-source MATLAB alternative for scientific computing and ECE engineering."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "sympy>=1.12",
+    "matplotlib>=3.7.0",
+    "PySide6>=6.5.0"
+]
+
+[project.scripts]
+vectra = "kheramat.gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
