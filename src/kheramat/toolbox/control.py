@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
-from typing import Dict, Callable, Any
+from typing import Dict, Callable, Any, Tuple
 from ..runtime.kheramat_array import KheraMATArray
 
 def _to_arr(val: Any) -> np.ndarray:
@@ -21,13 +21,13 @@ class KheraMATSystem:
 def km_tf(num, den) -> KheraMATSystem:
     return KheraMATSystem(num, den)
 
-def km_step(sys_obj) -> (KheraMATArray, KheraMATArray):
+def km_step(sys_obj) -> Tuple[KheraMATArray, KheraMATArray]:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     t, y = signal.step(sys_obj.sys)
     return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
 
-def km_impulse(sys_obj) -> (KheraMATArray, KheraMATArray):
+def km_impulse(sys_obj) -> Tuple[KheraMATArray, KheraMATArray]:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     t, y = signal.impulse(sys_obj.sys)
