@@ -85,11 +85,15 @@ def km_filter(b, a, x) -> KheraMATArray:
     res = signal.lfilter(b_arr, a_arr, x_arr)
     return KheraMATArray(res.reshape((1, -1)))
 
-def km_freqz(b, a, worN=512) -> (KheraMATArray, KheraMATArray):
+def km_freqz(b, a, worN=512, fs=None) -> (KheraMATArray, KheraMATArray):
     b_arr = _to_arr(b).flatten()
     a_arr = _to_arr(a).flatten()
     n = int(_to_arr(worN).item() if isinstance(worN, KheraMATArray) else worN)
-    w, h = signal.freqz(b_arr, a_arr, worN=n)
+    if fs is not None:
+        fs_val = float(_to_arr(fs).item() if isinstance(fs, KheraMATArray) else fs)
+        w, h = signal.freqz(b_arr, a_arr, worN=n, fs=fs_val)
+    else:
+        w, h = signal.freqz(b_arr, a_arr, worN=n)
     return KheraMATArray(h.reshape((-1, 1))), KheraMATArray(w.reshape((-1, 1)))
 
 def km_impz(b, a, n=50) -> (KheraMATArray, KheraMATArray):

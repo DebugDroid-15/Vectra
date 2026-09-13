@@ -80,6 +80,27 @@ def km_qpskmod(bits) -> KheraMATArray:
     symbols = np.array([lut[(int(p[0]), int(p[1]))] for p in b_pairs])
     return KheraMATArray(symbols.reshape((1, -1)))
 
+def km_bpskdemod(symbols) -> KheraMATArray:
+    s = _to_arr(symbols).flatten()
+    bits = np.where(np.real(s) >= 0, 1, 0)
+    return KheraMATArray(bits.reshape((1, -1)))
+
+def km_qpskdemod(symbols) -> KheraMATArray:
+    s = _to_arr(symbols).flatten()
+    bits = []
+    for sym in s:
+        re = np.real(sym)
+        im = np.imag(sym)
+        if re >= 0 and im >= 0:
+            bits.extend([0, 0])
+        elif re < 0 and im >= 0:
+            bits.extend([0, 1])
+        elif re < 0 and im < 0:
+            bits.extend([1, 1])
+        else:
+            bits.extend([1, 0])
+    return KheraMATArray(np.array(bits, dtype=int).reshape((1, -1)))
+
 COMMUNICATION_FUNCTIONS: Dict[str, Callable] = {
     "ammod": km_ammod,
     "amdemod": km_amdemod,
@@ -87,6 +108,8 @@ COMMUNICATION_FUNCTIONS: Dict[str, Callable] = {
     "fmdemod": km_fmdemod,
     "awgn": km_awgn,
     "bpskmod": km_bpskmod,
+    "bpskdemod": km_bpskdemod,
     "qpskmod": km_qpskmod,
+    "qpskdemod": km_qpskdemod,
 }
 

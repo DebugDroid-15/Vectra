@@ -8,9 +8,12 @@ def _to_arr(val: Any) -> np.ndarray:
         return val._array
     return np.array(val)
 
-def km_meshgrid(x, y) -> (KheraMATArray, KheraMATArray):
+def km_meshgrid(x, y=None) -> (KheraMATArray, KheraMATArray):
     x_arr = _to_arr(x).flatten()
-    y_arr = _to_arr(y).flatten()
+    if y is None:
+        y_arr = x_arr
+    else:
+        y_arr = _to_arr(y).flatten()
     X, Y = np.meshgrid(x_arr, y_arr)
     return KheraMATArray(X), KheraMATArray(Y)
 

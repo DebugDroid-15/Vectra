@@ -50,10 +50,24 @@ def km_bode(sys_obj):
     plt.show()
     return None
 
+def km_pole(sys_obj) -> KheraMATArray:
+    if not isinstance(sys_obj, KheraMATSystem):
+        raise ValueError("Expected a transfer function system created with tf(num, den)")
+    poles = sys_obj.sys.poles
+    return KheraMATArray(poles.reshape((-1, 1)))
+
+def km_zero(sys_obj) -> KheraMATArray:
+    if not isinstance(sys_obj, KheraMATSystem):
+        raise ValueError("Expected a transfer function system created with tf(num, den)")
+    zeros = sys_obj.sys.zeros
+    return KheraMATArray(zeros.reshape((-1, 1)))
+
 CONTROL_FUNCTIONS: Dict[str, Callable] = {
     "tf": km_tf,
     "step": km_step,
     "impulse": km_impulse,
     "bode": km_bode,
+    "pole": km_pole,
+    "zero": km_zero,
 }
 

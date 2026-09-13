@@ -1,0 +1,445 @@
+List of Matlab commands ind = sub2ind(matrSize,
+rowSub, colSub)
+ind2sub Subscripts from linear index
+General Purpose
+[I,J] = ind2sub(siz,IND)
+numel Number of elements in array or
+Operators and Special Characters subscripted array expression
++ ,-,*, .*, ^, .^, / , .\, ./, : , ( ), [ ], ., …, ,,; , %, ', = n = numel(A)
+Managing a Session
+clc Clears Command window
+Special Matrices
+clear Removes variables from
+eye Creates an identity matrix.
+memory
+ones Creates an array of ones.
+Special Variables and Constants
+zeros Creates an array of zeros.
+ans Most recent answer
+diag Diagonal matrices
+eps Accuracy of floating-point
+Matrix Arithmetic
+precision
+cross Computes cross products.
+i,j The imaginary unit 1
+C = cross(A,B)
+pi The number
+C = cross(A,B,dim)
+Input/Output Commands
+dot Computes dot products.
+disp Displays contents of an array
+C = dot(A,B)
+or string
+C = dot(A,B,dim)
+Solving Linear Equations
+Vector, Matrices and Arrays det Computes determinant of an array.
+inv Computes inverse of a matrix.
+Array Commands pinv Computes pseudoinverse of a matrix.
+find Finds indices of nonzero elements. Solve linear equations in the least-
+ind = find(X) squares sense.
+ind = find(X,k) rank Computes rank of a matrix.
+[row,col] = find(X) trace Sum of diagonal elements
+length Computers number of elements. norm Vector and matrix norms.
+numberOfElements =
+length(array)
+Plotting Commands
+linspace Creates regularly spaced vector.
+y = linspace(a,b)
+Basic xy Plotting Commands
+y = linspace(a,b,n)
+axis Sets axis limits.
+logspace Creates log spaced vector.
+axis([xmin xmax ymin
+y = logspace(a,b)
+ymax])
+y = logspace(a,b,n)
+grid Displays gridlines.
+max Returns largest element.
+plot Generates xy plot.
+C = max(A)
+plot(Y)
+[C,I] = max(A)
+plot(X1,Y1,...,Xn,Yn)
+min Returns smallest element.
+title Puts text at top of plot.
+reshape Change size
+xlabel Adds text label to x-axis.
+B = reshape(A,m,n)
+ylabel Adds text label to y-axis.
+repmat Replicate and tile array
+figure Opens a new figure window.
+B = repmat(A,m,n)
+Hold on/off Freezes/unfreezes current plot.
+size Computes array size
+text Places string in figure
+d = size(X)
+Specialized Plot Commands
+[m,n] = size(X)
+bar bar chart.
+sort Sorts each column.
+bar(Y)
+B = sort(A)
+bar(x,Y)
+B = sort(A,dim)
+polar polar plot.
+[B,IX] = sort(A)
+polar(theta,rho)
+sum Sums each column.
+hist Create and plot histogram
+B = sum(A)
+hist(data)
+B = sum(A,dim)
+hist(data,nbins)
+sub2ind Convert subscripts to linear indices
+hist(data,xcenters) find Finds indices of nonzero elements
+Color Symbol Line logical Convert numeric values to logical
+y yellow . point - solid M-Files
+m magenta o circle : dotted function Creates a function M-file.
+c cyan x x-mark -. dash dotted global Define global variables
+r red + plus -- dashed Timing
+g green * star cputime CPU time in seconds.
+b blue d diamond clock Current date and time
+w white v triangle (down) tic, toc Start, stop a stopwatch timer.
+k black ^ triangle (up)
+Mathematical Functions
+Three-Dimensional Plots
+contour Creates contour plot
+Exponential and Logarithms
+mesh mesh surface plot
+Exp, log, ln, log10, sqrt
+plot3 lines and points
+surf shaded mesh surface plot Trigonometric
+surfc surf with contour plot underneath cos, cot, csc, sec, sin, tan
+meshgrid Creates rectangular grid Inverse trig
+zlabel Adds text label to z-axis acos , acot, acsc, asec, asin, atan
+Complex Functions
+Programming
+abs Absolute value; |x|.
+angle Angle of a complex number x.
+Logical and Relation Operators conj Complex conjugate of x.
+== , ~=, <, <=, >, >=, &, |, ~, xor imag Imaginary part
+Flow Control real Real part
+break Terminates execution of a loop Statistical Functions
+error Display error messages mean Average
+error('msgString') M = mean(A)
+for for var = drange M = mean(A,dim)
+statements median median.
+end
+std standard deviation
+if if expression var variance
+statements
+Random Numbers
+elseif expression
+rand uniformly distributed random
+statements
+numbers between 0 and 1.
+else
+r = rand(n)
+statements r = rand(m,n)
+end
+randn normally distributed random
+return Return to the invoking function
+numbers
+switch comparing with case expressions r = randn(n)
+switch switch_expression
+r = randn(m,n)
+case case_expression
+Numeric Functions
+statements
+ceil Round up
+case case_expression
+floor Round down
+statements
+round Round to nearest integer
+:
+sign Signum
+otherwise
+rem Remainder after division
+statements
+mod Modulus after division
+end
+warning Display a warning message.
+Numerical Methods
+while while expression
+statements
+end Polynomial
+Logical Functions eig eigenvalues of a matrix.
+any True if any elements are nonzero d = eig(A)
+all True if all elements are nonzero [V,D] = eig(A)
+poly Computes polynomial from roots Operations on Lists, sets, Stering, etc …
+roots Computes polynomial roots. {} Define a set.
+r = roots(c) Set:={…}
+Root Finding and Minimization "" Define a string.
+fminbnd Find minimum of single-variable S1:="…"
+function on fixed interval . Concatenate
+x = fminbnd(fun,x1,x2) $ Such that.
+fminsearch Find minimum of unconstrained set:={f(i) $ i=a..b}
+multivariable map Apply function to set/sequence/list.
+x = fminsearch(fun,x0) Map(set,f)
+fzero Finds zero of single-variable [] Define a list
+function. List:=[a,b,…]
+x = fzero(fun,x0) sort Sort a list.
+Numerical Integration sort(list)
+quad Numerical integration with adaptive select Select from a list/set/sequence
+Simpson’s rule. Select(list,boolFunc)
+q = quad(fun,a,b)
+trapz Numerical integration with the
+Programming Basics
+trapezoidal rule.
+Z = trapz(Y)
+Z = trapz(Y,dim) Flow control
+Numerical Differentiation switch Switch statement
+diff the difference between adjacent case x
+elements of match1 do
+Y = diff(X) statements1
+Y = diff(X,n) of match2 do
+Y = diff(X,n,dim) statements2
+...
+otherwise
+otherstatements
+end_case
+List of muPad commands
+case x
+of match1 do
+General Purpose
+statements1
+of match2 do
+:= Assign variables statements2
+; Statement sequences ...
+delete Delete the value of an identifier end_case
+delete x , x , … for For loop
+1 2
+reset Re-initialize a session for i from start to stop do
+/% %/ comment body
+Special Values end_for
+TRUE Boolean constant TRUE
+FALSE Boolean constant FALSE for i from start to stop
+UNKNOWN Boolean constant UNKNOWN step stepwidth do
+infinity Real positive infinity body
+end_for
+Common Operations
+.. Range operator
+_for(i, start, stop,
+nops Number of operands
+stepwidth, body)
+op Operands of an object
+for i from start downto stop
+op(object, [i1, i2, …])
+do
+domtype Data type of an object
+body
+prog::exprtree Visualize an expression as tree
+end_for
+Print Print command
+for i from start downto stop B, <mode>, <method>,
+step stepwidth do options)
+body numeric:: Solve a system of linear equations
+end_for linsolve numeric::linsolve(eqs,
+if If-statement (conditional branch in a <vars>, options)
+program) numeric:: Numerical solution of equations (the
+if condition solve float attribute of solve). Find all roots.
+1
+numeric::solve(eqs,
+then casetrue
+1
+<vars>, options)
+elif condition then
+2
+casetrue Properties and Assumptions
+2
+elif condition then is Check a mathematical property of an expression
+3
+casetrue is(cond)
+3
+... is(ex, set)
+else casefalse Simplification
+end_if factorou Factor out a given expression
+while "while" loop t factorout(x, f, <list>)
+while condition do simplify Simplify an expression
+body Simplify(f)
+end_while expand Expand an expression
+return Exit a procedure expand(f, options)
+proc Define a procedure subs Substitute into an object
+proc(x ,x ,...) subs(f, old = new)
+1 2
+begin
+body Calculus
+end_proc D Differential operator for functions
+D(f)
+diff Differentiate an expression or a
+Mathematics
+polynomial
+diff(f)
+diff(f, x)
+-> Define a function/procedure inline
+( x , x , … ) -> body diff(f, x1, x2, …)
+1 2
+- - > Turn an expression into a procedure. diff(f, x $ 3)
+f:=x^2: g:=x-->f int Definite and indefinite integrals
+@ Compose functions int(f, x)
+f @ g @ ... int(f, x = a .. b,
+options)
+Symbolic Solvers
+linsolve Solve a system of linear equations numeric:: Numerical integration ( Quadrature )
+linsolve(eqs, vars, quadratur numeric::quadrature(f(x),
+options) e x = a .. b)
+RootOf Set of roots of a polynomial taylor Compute a Taylor series expansion
+RootOf(f, x) taylor(f, x = x0,
+solve Solve equations and inequalities <order>)
+solve(eq, x, options) sum Definite and indefinite summation
+solve(eq, x = a .. b, sum(f, i)
+options) sum(f, i = a .. b)
+Numeric Solvers numeric:: Numerical approximation of sums
+numeric:: Search for a numerical root of a system sum (the Float attribute of Sum )
+fsolve of equations numeric::sum(f(x), x = a
+numeric::fsolve(eq, x, .. b)
+options) numeric::sum(f(x), x in
+numeric::fsolve(eq, x = {x , x , …})
+1 2
+a, options) limit Compute a limit
+numeric::fsolve(eq, x = limit(f, x = x , <Left |
+0
+a .. b, options) Right | Real>,
+numeric:: Least squares solution of linear <Intervals>)
+leastSquares equations
+numeric::leastSquares(A,
+nullspace
+Linear Algebra linalg::orthog Orthogonalization of vectors
+array Create an array linalg::rank Rank of a matrix
+array(m .. n , <m .. n , …>) numeric::rank Numerical estimate of the rank
+1 1 2 2
+array(m .. n , <m .. n , …>, of a matrix
+1 1 2 2
+index = entry , index = linalg:: Eigenvalues
+1 1 2
+entry , …) eigenvalues
+2
+array(m .. n , <m .. n , …>, linalg:: Eigenvectors
+1 1 2 2
+List) eigenvectors
+array(<m .. n , m .. n , …>, numeric:: Numerical eigenvalues
+1 1 2 2
+ListOfLists) eigenvalues
+matrix Create a matrix or a vector numeric:: Numerical eigenvalues
+matrix(Array) eigenvectors
+matrix(List)
+matrix(ListOfRows) Polynomial Algebra
+matrix(m, n) poly Create a polynomial
+matrix(m, n, Array) poly(f, <[x , x , …]>,
+1 2
+matrix(m, n, List) <ring>)
+matrix(m, n, ListOfRows) divide Divide polynomials
+matrix(m, n, [(i 1, j 1) = divide(p, q
+value 1, (i 2, j 2) = value 2, …]) coeff Coefficients of a polynomial
+matrix(m, n, f) coeff(p, <x>, n)
+matrix(m, n, List, Diagonal) degree Degree of a polynomial
+Dom:: Constructor degree(p)
+<ring> Constructor:=Dom::IntegerMod(7) degree(p, x)
+linalg Generate a random matrix numeric:: Numerical roots of a univariate
+:: linalg::randomMatrix(m, n, polyroots polynomial
+random <R>, <bound>) numeric::polyroots(eqs)
+Matrix numeric:: Numerical search for a real root of a
+realroot real univariate function
+Matrix Operations and Transformations poly Create a polynomial
+linalg::addCol Add a colums poly(f, <[x 1, x 2, …]>,
+linalg::addRow Add a row <ring>)
+linalg::col Extract columns of a matrix divide Divide polynomials
+linalg::del Col Delete matrix columns divide(p, q
+linalg::delRow Delete matrix rows coeff Coefficients of a polynomial
+linalg::row Extract rows of a matrix coeff(p, <x>, n)
+inverse Inverse of a matrix degree Degree of a polynomial
+transpo se Transpose of a matrix degree(p)
+linalg:: Moore-Penrose inverse of a degree(p, x)
+pseudoInverse matrix numeric:: Numerical roots of a univariate
+numeric:: Numerical inverse of a matrix polyroots polynomial
+inverse numeric::polyroots(eqs)
+norm norm of a matrix or vector numeric:: Numerical search for a real root of a
+lina lg:: Normalize a vector realroot real univariate function
+normalize
+det Determinant
+numeric::det Numerical determinant
+linalg::angle Angle between two vectors
+linalg::ncols Number of columns
+linalg::nrows Number of rows
+linalg:: Square root of a matrix
+sqrtMatrix
+linalg::tr Trace
+linalg::ma tdim Dimension of a matrix
+linalg:: Basis for the null space
+Mathematical functions Set Operations
+Complex Numbers contains Test if an entry exists in a container
+abs, arg, Re, Im contains(s, object)
+Exponents and Logarithms in Membership
+exp, ln, log, log10, log2, ^, sqrt x in set
+Trigonometric Functions intersect Intersection of sets and/or intervals
+arcsin, arccos, arctan, arccsc, set 1 intersect set 2
+arcsec, arccot, sin, cos, tan, csc, minus Difference of sets and/or intervals
+sec, cot set 1 minus set 2
+union Union of sets and/or intervals
+Numbers and Precision
+set union set
+float Convert to a floating-point number 1 2
+Operations on Numbers
+Graphics
+ceil Rounding up to the next integer
+floor Rounding down to the next integer plot Display graphical objects on the
+conjugate Complex conjugation screen
+max Maximum of numbers plot(object)
+min Minimum of numbers plot(sin(x));
+round Rounding to the nearest integer plot(sin(x)/x,x=-1..1);
+plot([2*cos(t),sin(t)],t=
+0..2*PI)
+Random Numbers
+Parametric representation
+frandom Generate random floating-point numbers
+plot([2*cos(t),sin(t)],t=
+frandom()
+0..2*PI);
+frandom(seed)
+plot:: Plot a list of points.
+random Generate random integer numbers
+PointList plot(plot::PointList2d([[
+random(n .. n )
+1 2 2d 1,1],[2,2],[3,3]]));
+random(n)
+plot:: Plot a list of points connected by a
+die := random(1..6):
+Polygon2d line.
+die() $ i = 1..20
+plot(plot::Polygon2d([[1,
+stats:: Generate a random number generator for
+1],[2,4],[3,3]]));
+normal normal deviates
+plot:: 3D version of
+Random stats::normalRandom(m, v,
+PointList plot::PointList2d
+<Seed = s>)
+2d plot(plot::PointList3d([[
+stats:: Generate a random number generator for
+1,1,1], [1,2,2],
+uniform uniformly continuous deviates
+[1,3,2]])
+Random stats::uniformRandom(a, b,
+plot:: 3D version of
+<Seed = s>)
+Polygon2d plot::Polygon2d
+plot(plot::Polygon3d([[1,
+Discrete Mathematics
+1,1],[2,4,2],[3,3,1]]));
+gcd Greatest common divisor of
+plotfunc3 Plot a 3D function
+polynomials d plotfunc3d(1/(x^2 + y^2),
+gcd(p, q)
+plot(…,#3 x = -1..1, y = -1..1):
+fact, ! Factorial function D)
+div Integer part of a quotient plot:: Plot implicit functions
+m div n
+Implicit2 plot(plot::Implicit2d(x^3
+mod Modulo operator d +x+2=y^2,x=-5..5,y=-
+x mod m plot:: 5..5));
+bool Boolean evaluation Implicit3 plot(plot::Implicit3d(x^2
+bool(b) d +y^2+z^2=1,x=-2..2,y=-
+isprime 2..2,z=-2..2));
+plot:: Polar representation
+Polar plot(plot::Polar([r(t),t]
+,t=0..2*PI))

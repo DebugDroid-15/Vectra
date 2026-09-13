@@ -98,8 +98,10 @@ class KheraMATArray:
         return KheraMATArray(b - self._array)
 
     def matmul(self, other: 'KheraMATArray') -> 'KheraMATArray':
-        """Matrix multiplication (* in MATLAB)"""
+        """Matrix multiplication (* in MATLAB) with scalar expansion support"""
         b = other._array if isinstance(other, KheraMATArray) else np.array(other)
+        if self._array.size == 1 or b.size == 1:
+            return KheraMATArray(self._array * b)
         return KheraMATArray(np.matmul(self._array, b))
 
     def dot_mul(self, other: Any) -> 'KheraMATArray':
@@ -108,10 +110,12 @@ class KheraMATArray:
         return KheraMATArray(self._array * b)
 
     def matdiv(self, other: Any) -> 'KheraMATArray':
-        """Matrix right division (/ in MATLAB: A / B = A * inv(B))"""
+        """Matrix right division (/ in MATLAB: A / B = A * inv(B)) with scalar expansion"""
         b = other._array if isinstance(other, KheraMATArray) else np.array(other)
-        if b.shape == (1, 1):
+        if b.size == 1:
             return KheraMATArray(self._array / b)
+        if self._array.size == 1:
+            return KheraMATArray(self._array * np.linalg.pinv(b))
         return KheraMATArray(np.matmul(self._array, np.linalg.pinv(b)))
 
     def dot_div(self, other: Any) -> 'KheraMATArray':

@@ -46,13 +46,17 @@ class Parser:
 
     def parse(self) -> BlockNode:
         statements = []
+        fn_defs = []
         while self._peek().type != TokenType.EOF:
             if self._match(TokenType.NEWLINE, TokenType.SEMICOLON):
                 continue
             stmt = self.parse_statement()
             if stmt:
-                statements.append(stmt)
-        return BlockNode(statements)
+                if isinstance(stmt, FunctionDefNode):
+                    fn_defs.append(stmt)
+                else:
+                    statements.append(stmt)
+        return BlockNode(fn_defs + statements)
 
     def parse_statement(self) -> Optional[ASTNode]:
         tok = self._peek()

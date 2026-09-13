@@ -295,6 +295,14 @@ class PlotManager:
 
         cid = canvas.mpl_connect('button_press_event', on_click)
 
+    def zlabel(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax or not args: return
+        text = " ".join(str(a._array.item() if hasattr(a, "_array") and a._array.size == 1 else a) for a in args)
+        if hasattr(ax, 'set_zlabel'):
+            ax.set_zlabel(text)
+        self._refresh()
+
     def hold(self, flag: str = "on") -> None:
         flag_str = str(flag).lower()
         self.hold_on = flag_str in ("on", "1", "true")
@@ -305,6 +313,7 @@ def km_bar(x, y): PlotManager.get_instance().bar(x, y)
 def km_stem(*args): PlotManager.get_instance().stem(*args)
 def km_xlabel(*args): PlotManager.get_instance().xlabel(*args)
 def km_ylabel(*args): PlotManager.get_instance().ylabel(*args)
+def km_zlabel(*args): PlotManager.get_instance().zlabel(*args)
 def km_title(*args): PlotManager.get_instance().title(*args)
 def km_grid(flag="on"): PlotManager.get_instance().grid(flag)
 def km_figure(): PlotManager.get_instance().figure()
@@ -323,6 +332,7 @@ PLOTTING_FUNCTIONS: Dict[str, Callable] = {
     "stem": km_stem,
     "xlabel": km_xlabel,
     "ylabel": km_ylabel,
+    "zlabel": km_zlabel,
     "title": km_title,
     "grid": km_grid,
     "figure": km_figure,

@@ -133,9 +133,9 @@ class Lexer:
                     self.tokens.append(Token(TokenType.DOT_TRANSPOSE, ".'", start_line, start_col))
                     continue
                 elif not nxt.isdigit():
-                    # Single dot accessor or range placeholder
+                    # Single dot accessor
                     self._advance()
-                    self.tokens.append(Token(TokenType.COLON, ".", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT_MUL, ".", start_line, start_col))
                     continue
 
             # Single quote transpose
