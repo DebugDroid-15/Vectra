@@ -4,32 +4,50 @@
   <img src="Vectra.png" alt="Vectra Logo" width="220"/>
 </p>
 
-<h3 align="center">Free, Extensible, Open-Source Desktop Scientific Computing Platform & MATLAB Alternative</h3>
+<h2 align="center">VECTRA</h2>
+<h3 align="center">Compute. Simulate. Innovate.</h3>
 
 <p align="center">
-  Tailored for Electronics & Communication Engineering (ECE) Coursework, Lab Research, Signal Analysis, and Control Systems.
+  Free, Extensible, Open-Source Scientific Computing Platform & MATLAB Alternative
+</p>
+
+<p align="center">
+  Designed for Engineering Students, Researchers, Electronics Engineers, Communication Engineers, DSP Developers, Control Engineers, and Educators.
 </p>
 
 ---
 
-## 📖 Overview
+## 📖 Product Overview
 
-**Vectra** is a free, lightweight, open-source scientific computing desktop application and MATLAB-compatible environment built completely using Python's scientific ecosystem (`NumPy`, `SciPy`, `SymPy`, `Matplotlib`, and `PySide6`).
+**Vectra** is an independent, free, open-source scientific computing and engineering desktop environment designed as a practical alternative to MATLAB. Built completely on top of Python's high-performance scientific ecosystem (`NumPy`, `SciPy`, `SymPy`, `Matplotlib`, and `PySide6`), Vectra provides standard MATLAB language syntax—including 1-based indexing, matrix literals `[1 2; 3 4]`, range vectors (`start:step:stop`), plot formatting, and ECE curriculum toolboxes—without commercial license restrictions.
 
-It provides students, researchers, and engineers with an intuitive environment that preserves standard MATLAB syntax—including 1-based indexing, matrix constructors, range operators (`start:step:stop`), plot formatting, and ECE curriculum toolboxes—without requiring expensive commercial licenses.
+---
+
+## 📚 Technical Documentation & Architecture Baseline
+
+For complete engineering specifications, status audits, and release pipelines, explore our documentation in `docs/`:
+
+- 📋 **[Product Status Audit](docs/PRODUCT_STATUS.md)** — Empirical capability audit across Language, Runtime, Services, GUI, and Toolboxes.
+- 🗺️ **[Production Roadmap](docs/PRODUCTION_ROADMAP.md)** — Multi-phase release strategy from baseline to frozen binary distribution.
+- 🏗️ **[System Architecture](docs/ARCHITECTURE.md)** — Multi-tiered specifications separating Lexer, Parser, AST, Runtime, Application Services, and PySide6 GUI.
+- 📊 **[MATLAB Compatibility Matrix](docs/COMPATIBILITY.md)** — Verified compatibility status across matrix operations and domain-specific toolboxes.
+- 🧪 **[Testing Strategy](docs/TESTING.md)** — Strategy for automated unit, integration, and regression testing.
+- 🚀 **[Release Process](docs/RELEASE_PROCESS.md)** — Semantic versioning and CI build pipelines.
+- 🔒 **[Security Policy](docs/SECURITY.md)** — Execution security and local-first diagnostics.
+- ⚡ **[Performance Benchmarks](docs/PERFORMANCE.md)** — Runtime execution and memory target specs.
 
 ---
 
 ## ✨ Key Features & Highlights
 
-### 🖥️ 1. Modern Multi-Dock PySide6 IDE
+### 🖥️ 1. Modern Multi-Dock PySide6 IDE Architecture
 - **Script Editor**: Multi-tab code editor featuring syntax highlighting, line numbers, active line indicators, theme auto-matching, and file management.
-- **Command Window REPL**: Command prompt (`>>`) with command history (`Up`/`Down` arrows), MATLAB-style documentation lookup (`help <command>`), web browser doc launcher (`doc <command>`), and `clc`/`clear` support.
-- **Workspace Inspector**: Live variables table displaying real-time variable names, array shapes (e.g. `1x100 double`), types, and formatted values.
+- **Command Window REPL**: Command prompt (`>>`) with history navigation (`Up`/`Down` arrows), MATLAB-style documentation lookup (`help <command>`), web browser doc launcher (`doc <command>`), and `clc`/`clear` support.
+- **Workspace Inspector**: Real-time variables table displaying variable names, array shapes (e.g. `1x100 double`), types, and formatted values.
 - **Current Folder Explorer**: Integrated file tree view allowing you to browse your workspace and double-click `.m` scripts to open them directly in the editor.
 - **Interactive Figure Window**: Embedded Matplotlib toolbar supporting pan, zoom, tight layout resizing, interactive `gtext` click placement, and multi-format plot saving (PNG, SVG, PDF).
 - **Theme Switcher**: Instant toggle between Dark Theme and Light Theme directly from the top main toolbar.
-- **System Logs & Crash Inspector**: Built-in dialog to inspect live application logs and crash tracebacks in real-time.
+- **System Logs & Crash Inspector**: Built-in dialog to inspect live application logs (`vectra_app.log`) and crash tracebacks (`vectra_crash.log`).
 
 ---
 
@@ -81,11 +99,11 @@ Vectra includes out-of-the-box support for over 150+ universal matrix functions 
    cd Vectra
    ```
 2. **Launch via 1-Click Batch File**:
-   Double-click `Vectra.bat` in the root folder!
+   Double-click **`Vectra.bat`** in the root folder!
 
-   > `Vectra.bat` automatically checks for Python 3.10+, creates/configures dependencies, and opens the desktop environment immediately.
+   > `Vectra.bat` automatically scans your system for any Python installation (Standard Python, PyLauncher, Anaconda, Miniconda), creates an isolated `.venv` environment, installs dependencies, and opens the desktop environment immediately.
 
-For comprehensive execution instructions across platforms, read [HOW_TO_RUN.md](HOW_TO_RUN.md).
+For comprehensive execution instructions across platforms, read **[HOW_TO_RUN.md](HOW_TO_RUN.md)**.
 
 ---
 
@@ -162,7 +180,7 @@ To run Vectra in editable mode and execute automated pytest suites:
 # Install package in editable mode
 pip install -e .
 
-# Run pytest test suite (27 tests)
+# Run pytest test suite (29 tests passing 100%)
 pytest tests/
 
 # Launch GUI directly from Python module
