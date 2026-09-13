@@ -36,3 +36,4 @@ Vectra is an independent, free, open-source scientific computing and engineering
 
 - **Automated Tests**: 27 unit test suites in `tests/` passing 100% via `pytest`.
 - **Supported OS**: Windows (tested), Linux (CI headless test passing), macOS (untested).
+

@@ -11,3 +11,4 @@ Vectra follows Semantic Versioning (`MAJOR.MINOR.PATCH`).
    - Create git tag `vX.Y.Z` and push to GitHub.
 3. **GitHub Actions CI/CD**:
    - Automated workflow runs test matrix across Python versions 3.10, 3.11, 3.12 on Windows and Ubuntu.
+

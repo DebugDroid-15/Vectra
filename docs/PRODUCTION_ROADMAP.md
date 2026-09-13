@@ -26,3 +26,4 @@ This roadmap outlines the systematic phases required to evolve Vectra into a pro
 
 ### Phase 6: Standalone Packaging & Distribution
 - Configure PyInstaller / Nuitka frozen binary build pipeline to generate standalone `VectraSetup.exe` without requiring Python installation on target machines.
+

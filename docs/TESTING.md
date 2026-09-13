@@ -29,3 +29,4 @@ Execute pytest from the root repository directory:
 ```bash
 pytest tests/
 ```
+

@@ -44,3 +44,4 @@ Vectra enforces strict separation between the scientific computing runtime and t
 2. **Runtime Layer** (`src/kheramat/runtime/`): Interpreter visitor engine, `KheraMATArray` (1-based ndarray wrapper), `Workspace` variable scope.
 3. **Toolbox Layer** (`src/kheramat/toolbox/`): Core math, Signals, DSP, Communications, Electromagnetics, Control, and Symbolic functions wrapping NumPy/SciPy/SymPy.
 4. **GUI Layer** (`src/kheramat/gui/`): Desktop PySide6 user interface consuming application services.
+

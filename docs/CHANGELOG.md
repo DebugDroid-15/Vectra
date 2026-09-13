@@ -10,3 +10,4 @@ All notable changes to Vectra will be documented in this file.
 - Universal Matrix & ECE Toolboxes (SS, DSP, Communications, Control, Symbolic).
 - Diagnostic Logger & Crash Handler dialog.
 - Universal Python auto-scanner and Conda PATH sanitizer in `Vectra.bat`.
+

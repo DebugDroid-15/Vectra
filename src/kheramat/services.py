@@ -42,3 +42,4 @@ class WorkspaceService:
 
     def clear_workspace(self):
         self.workspace.clear()
+

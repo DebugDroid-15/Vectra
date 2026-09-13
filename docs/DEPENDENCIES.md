@@ -7,3 +7,4 @@ Vectra depends on Python's core scientific stack:
 - `sympy >= 1.12`
 - `matplotlib >= 3.7.0`
 - `PySide6 >= 6.5.0`
+
