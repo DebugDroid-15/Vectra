@@ -19,6 +19,9 @@ class ExecutionService:
         self.logger.debug(f"Executing command via ExecutionService: {code}")
         return self.interpreter.eval_code(code)
 
+    def execute_code(self, code: str) -> List[str]:
+        return self.execute_command(code)
+
     def run_script_file(self, file_path: str) -> List[str]:
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Script file not found: {file_path}")
