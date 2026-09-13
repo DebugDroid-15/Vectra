@@ -18,6 +18,7 @@ class TokenType(Enum):
     DOT_POW = auto()        # .^
     TRANSPOSE = auto()      # '
     DOT_TRANSPOSE = auto()  # .'
+    DOT = auto()            # .
 
     # Assignment & Equality / Comparison
     ASSIGN = auto()         # =

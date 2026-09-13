@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 from ..lang.ast_nodes import (
     ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode,
-    UnaryOpNode, BinaryOpNode, IndexingNode, AssignmentNode, CallNode,
+    UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode,
     ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode,
     BreakNode, ContinueNode, ReturnNode, FunctionDefNode
 )
@@ -233,6 +233,14 @@ class Interpreter:
                 if not node.suppress_output:
                     return f"\n{var_names[0]} =\n\n{val}\n"
         return None
+
+    def visit_MemberAccessNode(self, node: MemberAccessNode) -> Any:
+        obj = self.visit(node.obj)
+        if hasattr(obj, node.member):
+            return getattr(obj, node.member)
+        elif isinstance(obj, dict) and node.member in obj:
+            return obj[node.member]
+        raise InterpreterError(f"Object {obj} has no member '{node.member}'")
 
     def visit_CallNode(self, node: CallNode) -> Any:
         args = [self.visit(arg) for arg in node.args]

@@ -65,6 +65,14 @@ class IndexingNode(ASTNode):
     def __repr__(self):
         return f"IndexingNode({self.target}, indices={self.indices})"
 
+class MemberAccessNode(ASTNode):
+    def __init__(self, obj: ASTNode, member: str):
+        self.obj = obj
+        self.member = member
+
+    def __repr__(self):
+        return f"MemberAccessNode({self.obj}.{self.member})"
+
 class AssignmentNode(ASTNode):
     def __init__(self, target: ASTNode, value: ASTNode, suppress_output: bool = False):
         self.target = target

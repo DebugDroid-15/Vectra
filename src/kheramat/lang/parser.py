@@ -2,7 +2,7 @@ from typing import List, Optional
 from .tokens import Token, TokenType
 from .ast_nodes import (
     ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode,
-    UnaryOpNode, BinaryOpNode, IndexingNode, AssignmentNode, CallNode,
+    UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode,
     ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode,
     BreakNode, ContinueNode, ReturnNode, FunctionDefNode
 )
@@ -303,6 +303,10 @@ class Parser:
             if self._peek().type in (TokenType.TRANSPOSE, TokenType.DOT_TRANSPOSE):
                 op_tok = self._advance()
                 expr = UnaryOpNode(op_tok.value, expr)
+            elif self._peek().type == TokenType.DOT:
+                self._advance()
+                member_tok = self._expect(TokenType.IDENTIFIER, "Expected member name after '.'")
+                expr = MemberAccessNode(expr, member_tok.value)
             elif self._peek().type == TokenType.LPAREN:
                 self._advance()
                 args = []
