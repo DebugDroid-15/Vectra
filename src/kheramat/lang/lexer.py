@@ -113,6 +113,17 @@ class Lexer:
                 else:
                     raise LexerError("Unterminated string literal", start_line, start_col)
 
+            # Line continuation: ...
+            if ch == '.' and self._peek(1) == '.' and self._peek(2) == '.':
+                self._advance(); self._advance(); self._advance()
+                while self._peek() not in ('\n', '\0'):
+                    self._advance()
+                if self._peek() == '\n':
+                    self._advance()
+                    self.line += 1
+                    self.column = 1
+                continue
+
             # Dot operators: .*, ./, .^, .'
             if ch == '.':
                 nxt = self._peek(1)
