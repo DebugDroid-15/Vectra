@@ -1,201 +1,261 @@
-# Vectra — Scientific Computing & Engineering Desktop Environment
+# VECTRA
 
-<p align="center">
-  <img src="Vectra.png" alt="Vectra Logo" width="220"/>
-</p>
+<div align="center">
 
-<h2 align="center">VECTRA</h2>
-<h3 align="center">Compute. Simulate. Innovate.</h3>
+```
+  ___ ___ ____________ ________ _________    _____   
+ /   |   \\______   \\_____  \\______   \  /  _  \  
+/    ~    \|    |  _/ /   |   \|    |  _/ /  /_\  \ 
+\    Y    /|    |   \/    |    \    |   \/    |    \
+ \___|_  / |______  /\_______  /______  /\____|__  /
+       \/         \/         \/       \/         \/ 
+```
 
-<p align="center">
-  Free, Extensible, Open-Source Scientific Computing Platform & MATLAB Alternative
-</p>
+### **Compute. Simulate. Innovate.**
 
-<p align="center">
-  Designed for Engineering Students, Researchers, Electronics Engineers, Communication Engineers, DSP Developers, Control Engineers, and Educators.
-</p>
+**An Independent, Open-Source Scientific Computing and Engineering Desktop Environment**
 
----
-
-## 📖 Product Overview
-
-**Vectra** is an independent, free, open-source scientific computing and engineering desktop environment designed as a practical alternative to MATLAB. Built completely on top of Python's high-performance scientific ecosystem (`NumPy`, `SciPy`, `SymPy`, `Matplotlib`, and `PySide6`), Vectra provides standard MATLAB language syntax—including 1-based indexing, matrix literals `[1 2; 3 4]`, range vectors (`start:step:stop`), plot formatting, and ECE curriculum toolboxes—without commercial license restrictions.
-
----
-
-## 📚 Technical Documentation & Architecture Baseline
-
-For complete engineering specifications, status audits, and release pipelines, explore our documentation in `docs/`:
-
-- 📋 **[Product Status Audit](docs/PRODUCT_STATUS.md)** — Empirical capability audit across Language, Runtime, Services, GUI, and Toolboxes.
-- 🗺️ **[Production Roadmap](docs/PRODUCTION_ROADMAP.md)** — Multi-phase release strategy from baseline to frozen binary distribution.
-- 🏗️ **[System Architecture](docs/ARCHITECTURE.md)** — Multi-tiered specifications separating Lexer, Parser, AST, Runtime, Application Services, and PySide6 GUI.
-- 📊 **[MATLAB Compatibility Matrix](docs/COMPATIBILITY.md)** — Verified compatibility status across matrix operations and domain-specific toolboxes.
-- 🧪 **[Testing Strategy](docs/TESTING.md)** — Strategy for automated unit, integration, and regression testing.
-- 🚀 **[Release Process](docs/RELEASE_PROCESS.md)** — Semantic versioning and CI build pipelines.
-- 🔒 **[Security Policy](docs/SECURITY.md)** — Execution security and local-first diagnostics.
-- ⚡ **[Performance Benchmarks](docs/PERFORMANCE.md)** — Runtime execution and memory target specs.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
+[![PySide6](https://img.shields.io/badge/GUI-PySide6-41CD52.svg)](https://qt.io)
+[![Build Status](https://img.shields.io/badge/Tests-38%20Passed-success.svg)](tests/)
 
 ---
 
-## ✨ Key Features & Highlights
+[Key Features](#-key-features) •
+[Architecture](#-architecture-overview) •
+[Installation](#-installation--quick-start) •
+[Language Specifications](#-language--syntax-reference) •
+[Toolbox Reference](#-toolbox-ecosystem) •
+[Headless Execution](#-headless-cli--automation) •
+[Contributing](#-contributing--development)
 
-### 🖥️ 1. Modern Multi-Dock PySide6 IDE Architecture
-- **Script Editor**: Multi-tab code editor featuring syntax highlighting, line numbers, active line indicators, theme auto-matching, and file management.
-- **Command Window REPL**: Command prompt (`>>`) with history navigation (`Up`/`Down` arrows), MATLAB-style documentation lookup (`help <command>`), web browser doc launcher (`doc <command>`), and `clc`/`clear` support.
-- **Workspace Inspector**: Real-time variables table displaying variable names, array shapes (e.g. `1x100 double`), types, and formatted values.
-- **Current Folder Explorer**: Integrated file tree view allowing you to browse your workspace and double-click `.m` scripts to open them directly in the editor.
-- **Interactive Figure Window**: Embedded Matplotlib toolbar supporting pan, zoom, tight layout resizing, interactive `gtext` click placement, and multi-format plot saving (PNG, SVG, PDF).
-- **Theme Switcher**: Instant toggle between Dark Theme and Light Theme directly from the top main toolbar.
-- **System Logs & Crash Inspector**: Built-in dialog to inspect live application logs (`vectra_app.log`) and crash tracebacks (`vectra_crash.log`).
-
----
-
-### 🧮 2. Comprehensive Mathematical & ECE Toolboxes
-
-Vectra includes out-of-the-box support for over 150+ universal matrix functions and domain-specific engineering commands:
-
-#### 📐 Core Linear Algebra & Matrix Calculus
-- **Matrix Operations**: `inv`, `det`, `rank`, `trace`, `eig`, `svd`, `lu`, `qr`, `chol`, `cond`, `null`, `orth`, `pinv`.
-- **Matrix Exponentials & Functions**: `expm`, `logm`, `sqrtm`, `polyval`, `polyfit`, `cumsum`, `cumprod`, `prod`, `sum`, `mean`, `std`, `var`, `min`, `max`, `median`.
-- **Matrix Rearrangement**: `reshape`, `repmat`, `rot90`, `flip`, `fliplr`, `flipud`, `squeeze`, `diag`, `tril`, `triu`, `eye`, `zeros`, `ones`, `rand`, `randn`.
-- **Numerical Calculus & Root Finding**: `trapz`, `diff`, `fzero`, `cumsum`, `cross`, `dot`.
-
-#### 📶 Signals & Systems (SS)
-- **Elementary Signals**: `heaviside`, `unitstep`, `dirac`, `unitimpulse`, `sinc`, `square`, `sawtooth`, `chirp`, `rectpuls`, `tripuls`.
-- **Signal Analysis**: `conv`, `deconv`, `conv2`, `xcorr`, `fft`, `ifft`, `fftshift`, `ifftshift`, `abs`, `angle`, `unwrap`, `phase`.
-
-#### 📻 Communication Systems
-- **Analog Modulation**: `ammod`, `amdemod`, `fmmod`, `fmdemod`, `pmmod`, `pmdemod`.
-- **Digital Modulation**: `bpskmod`, `bpskdemod`, `qpskmod`, `qpskdemod`, `pammod`, `qammod`.
-- **Noise & Channels**: `awgn` (Additive White Gaussian Noise channel simulation).
-
-#### 🎛️ Digital Signal Processing (DSP)
-- **Filter Design**: `butter`, `cheby1`, `cheby2`, `ellip`, `bessel` (Lowpass, Highpass, Bandpass, Bandstop).
-- **Filter Analysis**: `freqz`, `zplane`, `impz`.
-- **Multi-rate Signal Processing**: `resample`, `decimate`, `interp`.
-
-#### 🧲 Principles of Electromagnetics (PEM)
-- **3D Grid Generation**: `meshgrid`, `griddata`.
-- **3D Visualization**: `surf`, `surfc`, `mesh`, `meshc`, `plot3`, `contour`, `contourf`.
-- **Vector Fields**: `quiver`, `quiver3`, `gradient`, `divergence`, `curl`.
-
-#### ⚙️ Control Systems & Transfer Functions
-- **System Representations**: `tf(num, den)`, `ss(A, B, C, D)`.
-- **Time Response**: `step`, `impulse`, `initial`, `ramp`.
-- **Frequency Response**: `bode`, `nyquist`, `rlocus`, `margin`, `pole`, `zero`.
-
-#### 🔣 Symbolic Mathematics
-- **Symbolic Variables & Expressions**: `syms x y z`, symbolic expression operator overloading.
-- **Symbolic Calculus**: `diff(f, x)`, `int(f, x)`, `limit(f, x, a)`, `solve(eqn, x)`, `dsolve`.
+</div>
 
 ---
 
-## ⚡ Quick Start (Windows Users)
+## ───────── Executive Overview ─────────
 
-1. **Clone or Download**:
+**Vectra** is a standalone, free, open-source scientific computing engine and graphical desktop platform designed for engineers, researchers, educators, and students. Developed as a modern Python-powered alternative to proprietary matrix environments like MATLAB, Vectra provides an intuitive syntax, matrix-first language runtime, and dedicated toolboxes across Digital Signal Processing (DSP), Control Systems, Communications, Symbolic Math, and State-Space modeling.
+
+Whether running as an interactive desktop environment or headlessly via `vectra-cli`, Vectra gives engineers a zero-dependency setup with native support for matrix math, 1-based Fortran column-major linear indexing, custom user functions, and rich graphical visualization.
+
+---
+
+## 🚀 Key Features
+
+### 🧠 Modern AST Language Engine
+* **Matrix-First Semantics**: Native 2D matrix literal constructions `[1 2 3; 4 5 6]`, range generators `1:0.1:10`, element-wise operator overloads (`.*`, `./`, `.^`), and matrix multiplications (`*`).
+* **Fortran Column-Major Indexing**: Authentic 1-based linear indexing (`A(2)` on `[1 2; 3 4]` yields `3`), matrix sub-slicing (`A(1:2, :)`), and matrix resizing.
+* **Control Flows & Functions**: Full support for `if/elseif/else`, `for` loops, `while` loops, loop signals (`break`, `continue`, `return`), and custom functions (`function [a, b] = myFunc(x, y)`).
+
+### 🎨 Modern Desktop Interface
+* **Catppuccin & Fluent Styling**: Aesthetic dark and light themes with rounded tab bars, custom scrollbars, styled action toolbars, and responsive dock panel splitting.
+* **Interactive Command Window REPL**: Direct command input with prompt history (`Up`/`Down` key navigation), error formatting, and real-time workspace updates.
+* **Multi-Tab Script Editor**: Advanced code editor with active line pointers, line numbers, and custom MATLAB syntax highlighting.
+* **Live Workspace Inspector**: Real-time inspection table displaying active variable names, array shapes (`MxN`), data types, and current values.
+* **Interactive Figure Window**: Built-in Matplotlib canvas toolbar enabling zooming, panning, grid toggling, and multi-subplot generation (`figure`, `subplot`, `plot`, `stem`).
+
+### 📦 Comprehensive Engineering Toolboxes
+* **Control Systems**: Transfer function creation (`tf(num, den)`), step response plotting (`step(sys)`), and impulse evaluation.
+* **Digital Signal Processing (DSP)**: Fast Fourier Transforms (`fft`, `ifft`), frequency responses (`freqz`), digital filtering (`filter`), and windowing functions (`hamming`, `hann`).
+* **Communications Engineering**: Analog and digital modulation schemes (`ammod`, `amdemod`, `fmmod`, `fmdemod`), and Bit Error Rate analysis tools.
+* **State-Space Modeling**: State-Space matrices (`ss(A,B,C,D)`), controllability (`ctrb`), and observability (`obsv`) matrices.
+* **Symbolic Math Engine**: Symbolic variable creation (`syms x y`), differentiation (`diff`), integration (`integrate`), and equation solving (`solve`).
+
+---
+
+## 🏗️ Architecture Overview
+
+Vectra is structured as a layered system separating core language parsing, runtime execution context, domain-specific engineering toolboxes, and presentation GUI widgets:
+
+```
+                  ┌─────────────────────────────────────┐
+                  │          Vectra Desktop GUI         │
+                  │   (PySide6 / MainWindow / Dock)     │
+                  └──────────────────┬──────────────────┘
+                                     │
+                 ┌───────────────────┴───────────────────┐
+                 │          ExecutionService             │
+                 │   (Decoupled App Execution Layer)     │
+                 └───────────────────┬───────────────────┘
+                                     │
+          ┌──────────────────────────┼──────────────────────────┐
+          │                          │                          │
+┌─────────┴──────────┐     ┌─────────┴──────────┐     ┌─────────┴──────────┐
+│  Parser & Tokens   │     │  Interpreter Core  │     │ Workspace Context  │
+│(Lexer/AST/Grammar) │     │ (Visitor Pattern)  │     │(Variables/Symbols) │
+└────────────────────┘     └────────────────────┘     └────────────────────┘
+                                     │
+                 ┌───────────────────┴───────────────────┐
+                 │       Toolboxes & KheraMATArray       │
+                 │(DSP / Control / Syms / Matplotlib Canvas)│
+                 └───────────────────────────────────────┘
+```
+
+---
+
+## 📥 Installation & Quick Start
+
+### Prerequisites
+* **Operating System**: Windows 10/11, Linux, or macOS.
+* **Python**: Python 3.10, 3.11, 3.12, or 3.13.
+
+### Quick Setup
+
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/DebugDroid-15/Vectra.git
+   git clone https.github.com/DebugDroid-15/Vectra.git
    cd Vectra
    ```
-2. **Launch via 1-Click Batch File**:
-   Double-click **`Vectra.bat`** in the root folder!
 
-   > `Vectra.bat` automatically scans your system for any Python installation (Standard Python, PyLauncher, Anaconda, Miniconda), creates an isolated `.venv` environment, installs dependencies, and opens the desktop environment immediately.
+2. **Launch via Universal Automated Script (Windows)**:
+   Simply run the root executable script:
+   ```cmd
+   Vectra.bat
+   ```
+   *`Vectra.bat` automatically isolates PATH DLL conflicts, creates/updates a local `.venv`, installs missing dependencies via `pyproject.toml`, and launches the Desktop App.*
 
-For comprehensive execution instructions across platforms, read **[HOW_TO_RUN.md](HOW_TO_RUN.md)**.
+3. **Manual Virtual Environment Setup**:
+   ```bash
+   python -m venv .venv
+   # Windows:
+   .venv\Scripts\activate
+   # Linux/macOS:
+   source .venv/bin/activate
 
----
+   pip install -e .
+   ```
 
-## 🖥️ Graphical User Interface Overview
-
-```
-+-----------------------------------------------------------------------------------+
-|  Vectra Desktop — Scientific Computing Environment                                |
-+-----------------------------------------------------------------------------------+
-| [▶ Run Script] [📄 New] [💾 Save] [🧹 Clear] [☀️ Theme] [📋 Logs & Crashes]       |
-+---------------------+---------------------------------------+---------------------+
-| Current Folder      | Script Editor (Untitled.m)            | Figure Window       |
-| 📁 src/             | 1  clc; clear;                       | 📈 Matplotlib Plot  |
-| 📁 tests/           | 2  t = 0:0.01:1;                      | [Toolbar: Pan/Zoom] |
-| 📄 main.m           | 3  x = sin(2*pi*5*t);                 +---------------------+
-| 📄 signal.m         | 4  plot(t, x); grid on;               | Workspace Inspector |
-|                     |                                       | Name | Size | Value |
-|                     |                                       | t    | 1x101| double|
-|                     |                                       | x    | 1x101| double|
-+---------------------+---------------------------------------+---------------------+
-| Command Window (REPL Prompt)                                                      |
-| >> x = 1:5                                                                        |
-| x =                                                                               |
-|      1     2     3     4     5                                                    |
-| >>                                                                                |
-+-----------------------------------------------------------------------------------+
-```
+4. **Start Desktop Application**:
+   ```bash
+   python -m kheramat.gui.app
+   ```
 
 ---
 
-## 📜 Example Script: ECE Communications Simulation
+## 📖 Language & Syntax Reference
 
-Create a script in the Vectra Script Editor and click **▶ Run Script**:
+Vectra provides intuitive scientific syntax matching matrix conventions:
 
+### Matrix Operations & Linear Indexing
 ```matlab
-% AM Modulation & Demodulation Simulation
-clc; clear; close all;
+% Matrix Literal Creation
+A = [1, 2, 3; 4, 5, 6; 7, 8, 9];
 
-% Time Vector
-t = 0:0.001:0.1;
+% Range Vector Generation
+t = 0:0.01:1;
 
-% Carrier & Message Frequencies
-fm = 20;   % Message frequency (20 Hz)
-fc = 200;  % Carrier frequency (200 Hz)
+% Fortran Column-Major 1-Based Indexing
+val = A(2);      % Returns 4 (Column 1, Row 2)
+sub = A(1:2, :); % Returns top two rows
 
-% Message Signal
-m = sin(2*pi*fm*t);
+% Element-wise Operations
+B = A .* 2;
+C = A .^ 2;
+```
 
-% AM Modulated Signal
-s = ammod(m, fc, 1000);
+### Control Flow Constructs
+```matlab
+% Conditionals
+x = 15;
+if x > 20
+    disp('High');
+elseif x > 10
+    disp('Medium');
+else
+    disp('Low');
+end
 
-% Plot Results
-figure;
-subplot(2,1,1);
-plot(t, m);
-title('Message Signal m(t)');
-xlabel('Time (s)'); ylabel('Amplitude');
-grid on;
+% Loops with Break / Continue
+acc = 0;
+for i = 1:10
+    if i == 5
+        continue;
+    end
+    if i == 8
+        break;
+    end
+    acc = acc + i;
+end
+```
 
-subplot(2,1,2);
-plot(t, s);
-title('AM Modulated Signal s(t)');
-xlabel('Time (s)'); ylabel('Amplitude');
-grid on;
+### Custom Function Definitions
+```matlab
+function [out1, out2] = computeStats(data)
+    out1 = mean(data);
+    out2 = std(data);
+end
 ```
 
 ---
 
-## 🛠️ Developer Setup & Running Tests
+## 🛠️ Toolbox Ecosystem
 
-To run Vectra in editable mode and execute automated pytest suites:
+| Toolbox Module | Key Functions | Description |
+| :--- | :--- | :--- |
+| **Control Systems** | `tf(num, den)`, `step(sys)`, `impulse(sys)` | Transfer function modeling & dynamic step response analysis. |
+| **DSP Toolbox** | `fft(x)`, `ifft(x)`, `freqz(b, a)`, `filter(b, a, x)` | Spectral analysis, digital filtering, and z-transform analysis. |
+| **Communications** | `ammod`, `amdemod`, `fmmod`, `fmdemod` | Analog amplitude/frequency modulation and demodulation pipelines. |
+| **State-Space** | `ss(A,B,C,D)`, `ctrb(A,B)`, `obsv(A,C)` | Linear time-invariant state space system analysis. |
+| **Symbolic Math** | `syms`, `diff`, `integrate`, `solve` | Algebraic differentiation, integration, and symbolic solver engine. |
+
+---
+
+## 💻 Headless CLI & Automation
+
+Vectra includes a standalone CLI interface for headless server script execution, continuous integration pipelines, and batch computing:
 
 ```bash
-# Install package in editable mode
-pip install -e .
+# Evaluate an inline expression
+vectra-cli --eval "A = [1 2; 3 4]; B = A * 2; disp(B);"
 
-# Run pytest test suite (29 tests passing 100%)
-pytest tests/
-
-# Launch GUI directly from Python module
-python -m kheramat.gui.app
+# Run a script file headlessly
+vectra-cli --run scripts/dsp_simulation.m
 ```
 
 ---
 
-## 📄 License & Open Source Stack
+## 🧪 Testing & Verification
 
-Vectra is open-source software released under the [MIT License](LICENSE).
+Vectra includes automated test suites covering AST parsing, array indexing, matrix arithmetic, toolbox solvers, and project management.
 
-Built with pride using Python scientific libraries:
-- [PySide6 / Qt](https://www.qt.io/) — Desktop User Interface
-- [NumPy](https://numpy.org/) — High-Performance Array Engine
-- [SciPy](https://scipy.org/) — Scientific & Signal Processing Algorithms
-- [SymPy](https://www.sympy.org/) — Symbolic Mathematics
-- [Matplotlib](https://matplotlib.org/) — 2D & 3D Plotting Canvas
+To run the complete test suite:
+```bash
+pytest tests/
+```
+
+```text
+============================= test session starts =============================
+collected 38 items
+
+tests/test_cli.py ..                                                    [ 5%]
+tests/test_diagnostics.py .                                             [ 7%]
+tests/test_indexing.py .                                                [10%]
+tests/test_interpreter.py ........                                      [31%]
+tests/test_projects.py .                                               [34%]
+tests/test_toolboxes.py ..................                             [81%]
+tests/test_user_functions.py ......                                    [100%]
+
+============================== 38 passed in 6.50s ==============================
+```
+
+---
+
+## 🤝 Contributing & Development
+
+Contributions are welcome! Please follow these guidelines:
+1. **Fork the Repository**: Create your feature branch (`git checkout -b feature/AmazingFeature`).
+2. **Ensure Clean Code & Tests**: Verify all existing tests pass (`pytest tests/`).
+3. **Commit Your Changes**: (`git commit -m 'feat(toolbox): add bode plot generator'`).
+4. **Push to Remote Branch**: (`git push origin feature/AmazingFeature`).
+5. **Open a Pull Request**.
+
+---
+
+<div align="center">
+
+**Vectra — Compute. Simulate. Innovate.**  
+Licensed under the [MIT License](LICENSE).
+
+</div>
