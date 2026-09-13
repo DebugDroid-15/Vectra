@@ -13,3 +13,4 @@ def test_project_save_load(tmp_path):
     loaded = VectraProject.load(str(config_file))
     assert loaded.name == "MyECEProject"
     assert loaded.entry_script == "main.m"
+

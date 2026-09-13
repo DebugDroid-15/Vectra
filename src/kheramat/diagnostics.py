@@ -30,3 +30,4 @@ class VectraDiagnostic:
 
     def __repr__(self) -> str:
         return f"VectraDiagnostic({self.code}, {self.message!r}, line={self.line}, col={self.column})"
+

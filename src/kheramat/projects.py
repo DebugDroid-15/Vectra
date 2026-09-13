@@ -35,3 +35,4 @@ class VectraProject:
         proj = cls(data.get("name", "Untitled"), root, data.get("entry_script", "main.m"))
         proj.version = data.get("version", "1.0.0")
         return proj
+

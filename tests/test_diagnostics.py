@@ -14,3 +14,4 @@ def test_vectra_diagnostic_formatting():
     assert "VEC-INDEX-001" in formatted
     assert "Line 12, Column 5" in formatted
     assert "Ensure index is within" in formatted
+

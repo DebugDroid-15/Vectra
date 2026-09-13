@@ -11,3 +11,4 @@ def test_column_major_linear_indexing():
     """)
     assert interp.workspace.get("v2")._array.item() == 3
     assert interp.workspace.get("v3")._array.item() == 2
+

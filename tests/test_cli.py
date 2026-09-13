@@ -17,3 +17,4 @@ def test_cli_run_script(tmp_path, capsys):
 def test_cli_file_not_found(capsys):
     ret = run_cli(["--run", "non_existent_file.m"])
     assert ret == 1
+

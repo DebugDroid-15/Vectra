@@ -71,3 +71,4 @@ def run_cli(args: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(run_cli())
+

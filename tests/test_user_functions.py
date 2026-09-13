@@ -36,3 +36,4 @@ def test_break_continue():
     end
     """)
     assert interp.workspace.get("acc")._array.item() == 10
+
