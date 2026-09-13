@@ -120,7 +120,7 @@ echo [3/4] Validating runtime binaries and graphical dependencies...
 "%PYTHON_EXE%" -c "import PySide6, numpy, matplotlib" >nul 2>&1
 if %errorlevel% neq 0 (
     echo [INFO] Installing required GUI libraries (PySide6)...
-    "%PYTHON_EXE%" -m pip install PySide6 numpy matplotlib >nul 2>&1
+    "%PYTHON_EXE%" -m pip install PySide6 numpy matplotlib
 )
 
 echo [4/4] Launching Vectra Graphical Desktop Environment...
@@ -132,9 +132,12 @@ echo.
 if %errorlevel% neq 0 (
     echo.
     echo =========================================================================
-    echo [CRITICAL ERROR] Vectra Desktop application crashed or exited cleanly with code: %errorlevel%
+    echo [CRITICAL ERROR] Vectra Desktop application crashed or exited with error code: %errorlevel%
     echo =========================================================================
-    echo Detailed crash trace saved at: %USERPROFILE%\.vectra\logs\vectra_app.log
+    echo Log file saved at: %USERPROFILE%\.vectra\logs\vectra_app.log
     echo.
     pause
+) else (
+    echo.
+    echo Vectra application closed cleanly.
 )
