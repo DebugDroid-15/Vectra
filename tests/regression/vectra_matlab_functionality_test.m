@@ -40,3 +40,4 @@ subplot(2, 1, 2);
 plot(t(1:200), filtered(1:200));
 title('Filtered Signal');
 grid on;
+

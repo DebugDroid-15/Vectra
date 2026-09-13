@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from typing import Dict, Callable, Any
 from ..runtime.kheramat_array import KheraMATArray
@@ -88,6 +89,40 @@ def km_sum(arr) -> KheraMATArray: return KheraMATArray(np.sum(_to_arr(arr)))
 def km_mean(arr) -> KheraMATArray: return KheraMATArray(np.mean(_to_arr(arr)))
 def km_min(arr) -> KheraMATArray: return KheraMATArray(np.min(_to_arr(arr)))
 def km_max(arr) -> KheraMATArray: return KheraMATArray(np.max(_to_arr(arr)))
+
+def _format_matlab(fmt: str, *args) -> str:
+    fmt_str = str(fmt._array.item() if hasattr(fmt, "_array") else fmt)
+    # Convert escaped newlines
+    fmt_str = fmt_str.replace("\\n", "\n").replace("\\t", "\t")
+    
+    clean_args = []
+    for arg in args:
+        if hasattr(arg, "_array"):
+            arr = arg._array
+            if arr.size == 1:
+                clean_args.append(arr.item())
+            else:
+                for item in arr.flatten(order='F'):
+                    clean_args.append(item)
+        else:
+            clean_args.append(arg)
+    
+    if clean_args:
+        try:
+            return fmt_str % tuple(clean_args)
+        except Exception:
+            return fmt_str
+    return fmt_str
+
+def km_sprintf(fmt: str, *args) -> KheraMATArray:
+    res = _format_matlab(fmt, *args)
+    return KheraMATArray(res)
+
+def km_fprintf(fmt: str, *args):
+    res = _format_matlab(fmt, *args)
+    sys_stdout_write = getattr(sys.stdout, 'write', None)
+    print(res, end='')
+    return None
 
 def km_disp(*args):
     for item in args:
@@ -379,4 +414,6 @@ CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
     "diff": km_diff,
     "fzero": km_fzero,
     "disp": km_disp,
+    "fprintf": km_fprintf,
+    "sprintf": km_sprintf,
 }
