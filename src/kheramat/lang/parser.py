@@ -217,27 +217,18 @@ class Parser:
         return self.parse_colon_range()
 
     def parse_colon_range(self) -> ASTNode:
-        # Check if the expression starts directly with a colon (e.g. : or :10)
-        if self._peek().type == TokenType.COLON and self._peek(1).type not in (TokenType.COMMA, TokenType.RPAREN, TokenType.RBRACKET, TokenType.SEMICOLON):
-            self._advance()
-            stop_expr = self.parse_logical_or()
-            return ColonRangeNode(start=NumberNode(1), stop=stop_expr)
-
-        expr = self.parse_logical_or()
-
+        left = self.parse_logical_or()
         if self._peek().type == TokenType.COLON:
             self._advance()
-            # If colon is followed by a terminator or comma/rparen, it's a full range ':'
             if self._peek().type in (TokenType.COMMA, TokenType.RPAREN, TokenType.RBRACKET, TokenType.SEMICOLON):
-                return ColonRangeNode(start=expr, stop=StringNode(":"))
+                return ColonRangeNode(start=left, stop=StringNode(":"))
             second = self.parse_logical_or()
             if self._peek().type == TokenType.COLON:
                 self._advance()
                 third = self.parse_logical_or()
-                return ColonRangeNode(start=expr, step=second, stop=third)
-            return ColonRangeNode(start=expr, stop=second)
-
-        return expr
+                return ColonRangeNode(start=left, step=second, stop=third)
+            return ColonRangeNode(start=left, stop=second)
+        return left
 
     def parse_logical_or(self) -> ASTNode:
         left = self.parse_logical_and()
