@@ -93,3 +93,4 @@ vectra-cli --run path/to/script.m
 If Vectra crashes unexpectedly, full diagnostic traces are automatically logged to:
 * **Windows**: `%USERPROFILE%\.vectra\logs\vectra_app.log`
 * **Linux/macOS**: `~/.vectra/logs/vectra_app.log`
+
