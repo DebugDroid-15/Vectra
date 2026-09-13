@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 title Vectra - Scientific Computing Desktop Environment
 
@@ -103,13 +104,10 @@ exit /b 9009
 
 :RUN_SETUP
 echo.
-echo [2/4] Executing Vectra Automated Setup Wizard with Live Progress & ETA...
+echo [2/4] Executing Vectra Automated Setup Wizard with Live Progress...
 echo.
 
 "%SYS_PYTHON%" src\kheramat\setup_wizard.py
-if %errorlevel% neq 0 (
-    echo [WARNING] Setup wizard reported warnings. Continuing startup sequence...
-)
 
 set "PYTHON_EXE=.venv\Scripts\python.exe"
 if not exist "%PYTHON_EXE%" (
@@ -137,7 +135,5 @@ if %errorlevel% neq 0 (
     echo Log file saved at: %USERPROFILE%\.vectra\logs\vectra_app.log
     echo.
     pause
-) else (
-    echo.
-    echo Vectra application closed cleanly.
 )
+

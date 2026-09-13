@@ -6,7 +6,7 @@ import shutil
 
 def print_progress(percentage: int, title: str, detail: str, eta_str: str, length: int = 30):
     filled_length = int(length * percentage // 100)
-    bar = '█' * filled_length + '░' * (length - filled_length)
+    bar = '=' * filled_length + '-' * (length - filled_length)
     sys.stdout.write(f'\r[{bar}] {percentage:3d}% | {title}: {detail} ({eta_str})   ')
     sys.stdout.flush()
 
