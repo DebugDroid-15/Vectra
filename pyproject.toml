@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 vectra = "kheramat.gui.app:main"
+vectra-cli = "kheramat.cli:run_cli"
 
 [tool.setuptools.packages.find]
 where = ["src"]

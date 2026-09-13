@@ -45,16 +45,16 @@ class KheraMATArray:
         if len(indices) == 1:
             idx = indices[0]
             if isinstance(idx, str) and idx == ":":
-                return KheraMATArray(self._array.flatten().reshape((-1, 1)))
+                return KheraMATArray(self._array.flatten(order='F').reshape((-1, 1)))
             elif isinstance(idx, KheraMATArray):
                 if idx.dtype == np.bool_:
-                    return KheraMATArray(self._array.flatten()[idx._array.flatten()])
+                    return KheraMATArray(self._array.flatten(order='F')[idx._array.flatten(order='F')])
                 else:
-                    py_idx = (idx._array.flatten() - 1).astype(int)
-                    return KheraMATArray(self._array.flatten()[py_idx])
+                    py_idx = (idx._array.flatten(order='F') - 1).astype(int)
+                    return KheraMATArray(self._array.flatten(order='F')[py_idx])
             else:
                 py_idx = int(idx) - 1
-                return KheraMATArray(self._array.flatten()[py_idx])
+                return KheraMATArray(self._array.flatten(order='F')[py_idx])
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
             r_idx = slice(None) if r == ":" else ((r._array.astype(int) - 1) if isinstance(r, KheraMATArray) else int(r) - 1)

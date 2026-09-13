@@ -123,3 +123,28 @@ class WhileNode(ASTNode):
     def __repr__(self):
         return f"WhileNode(cond={self.condition})"
 
+class BreakNode(ASTNode):
+    def __repr__(self):
+        return "BreakNode()"
+
+class ContinueNode(ASTNode):
+    def __repr__(self):
+        return "ContinueNode()"
+
+class ReturnNode(ASTNode):
+    def __init__(self, return_expr: Optional[ASTNode] = None):
+        self.return_expr = return_expr
+
+    def __repr__(self):
+        return f"ReturnNode({self.return_expr})"
+
+class FunctionDefNode(ASTNode):
+    def __init__(self, name: str, params: List[str], returns: List[str], body: BlockNode):
+        self.name = name
+        self.params = params
+        self.returns = returns
+        self.body = body
+
+    def __repr__(self):
+        return f"FunctionDefNode(name={self.name}, params={self.params}, returns={self.returns})"
+

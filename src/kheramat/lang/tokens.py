@@ -52,6 +52,8 @@ class TokenType(Enum):
     FOR = auto()
     WHILE = auto()
     RETURN = auto()
+    BREAK = auto()
+    CONTINUE = auto()
 
     EOF = auto()
 
@@ -64,6 +66,8 @@ KEYWORDS = {
     "for": TokenType.FOR,
     "while": TokenType.WHILE,
     "return": TokenType.RETURN,
+    "break": TokenType.BREAK,
+    "continue": TokenType.CONTINUE,
 }
 
 class Token:

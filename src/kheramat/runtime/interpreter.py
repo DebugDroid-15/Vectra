@@ -3,7 +3,8 @@ import numpy as np
 from ..lang.ast_nodes import (
     ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode,
     UnaryOpNode, BinaryOpNode, IndexingNode, AssignmentNode, CallNode,
-    ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode
+    ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode,
+    BreakNode, ContinueNode, ReturnNode, FunctionDefNode
 )
 from ..lang.lexer import Lexer
 from ..lang.parser import Parser
@@ -23,6 +24,12 @@ class InterpreterError(Exception):
     def __init__(self, message: str, node: Optional[ASTNode] = None):
         super().__init__(f"Error: {message}")
         self.node = node
+
+class BreakSignal(Exception): pass
+class ContinueSignal(Exception): pass
+class ReturnSignal(Exception):
+    def __init__(self, value: Any = None):
+        self.value = value
 
 class Interpreter:
     def __init__(self, workspace: Optional[Workspace] = None):
@@ -230,6 +237,47 @@ class Interpreter:
     def visit_CallNode(self, node: CallNode) -> Any:
         args = [self.visit(arg) for arg in node.args]
 
+    def visit_BreakNode(self, node: BreakNode):
+        raise BreakSignal()
+
+    def visit_ContinueNode(self, node: ContinueNode):
+        raise ContinueSignal()
+
+    def visit_ReturnNode(self, node: ReturnNode):
+        val = self.visit(node.return_expr) if node.return_expr else None
+        raise ReturnSignal(val)
+
+    def visit_FunctionDefNode(self, node: FunctionDefNode):
+        def user_func(*args):
+            old_workspace = self.workspace
+            local_ws = Workspace()
+            # Bind parameters
+            for p_name, arg_val in zip(node.params, args):
+                local_ws.set(p_name, arg_val)
+            self.workspace = local_ws
+            try:
+                self.eval_block(node.body)
+            except ReturnSignal as ret:
+                pass
+            finally:
+                res_vals = []
+                for ret_name in node.returns:
+                    if local_ws.has(ret_name):
+                        res_vals.append(local_ws.get(ret_name))
+                self.workspace = old_workspace
+
+            if len(res_vals) == 0:
+                return None
+            elif len(res_vals) == 1:
+                return res_vals[0]
+            return tuple(res_vals)
+
+        self.functions[node.name] = user_func
+        return None
+
+    def visit_CallNode(self, node: CallNode) -> Any:
+        args = [self.visit(arg) for arg in node.args]
+
         if node.func_name in self.functions:
             func = self.functions[node.func_name]
             return func(*args)
@@ -290,8 +338,13 @@ class Interpreter:
         logs = []
         for item in items:
             self.workspace.set(node.var_name, KheraMATArray(item))
-            res = self.eval_block(node.body)
-            logs.extend(filter(None, res))
+            try:
+                res = self.eval_block(node.body)
+                logs.extend(filter(None, res))
+            except BreakSignal:
+                break
+            except ContinueSignal:
+                continue
         return "\n".join(logs) if logs else None
 
     def visit_WhileNode(self, node: WhileNode) -> Optional[str]:
@@ -301,6 +354,11 @@ class Interpreter:
             is_true = bool(np.all(cond_val._array)) if isinstance(cond_val, KheraMATArray) else bool(cond_val)
             if not is_true:
                 break
-            res = self.eval_block(node.body)
-            logs.extend(filter(None, res))
+            try:
+                res = self.eval_block(node.body)
+                logs.extend(filter(None, res))
+            except BreakSignal:
+                break
+            except ContinueSignal:
+                continue
         return "\n".join(logs) if logs else None
