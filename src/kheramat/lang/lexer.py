@@ -78,6 +78,9 @@ class Lexer:
                         break
 
                 val = float(num_str) if (has_dot or has_exp) else int(num_str)
+                if self._peek() in ('i', 'j') and not self._peek(1).isalnum():
+                    self._advance()
+                    val = complex(0, val)
                 self.tokens.append(Token(TokenType.NUMBER, val, start_line, start_col))
                 continue
 

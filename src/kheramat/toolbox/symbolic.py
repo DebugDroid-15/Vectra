@@ -2,6 +2,16 @@ import sympy as sp
 from typing import Dict, Callable, Any
 from ..runtime.kheramat_array import KheraMATArray
 
+import re
+
+def clean_sym_str(expr: Any) -> str:
+    s = str(expr)
+    s = re.sub(r'\*\*([0-9\.]+)', r'^\1', s)
+    s = re.sub(r'\*\*', r'^', s)
+    s = re.sub(r'([0-9]+)\.0(?![0-9])', r'\1', s)
+    s = re.sub(r'(\d+)\*([a-zA-Z])', r'\1*\2', s)
+    return s
+
 def _to_sympy(expr: Any) -> Any:
     if isinstance(expr, KheraMATArray):
         arr = expr._array
@@ -50,7 +60,12 @@ def km_solve(equation, var=None):
         sp_var = free_vars[0] if free_vars else sp.Symbol('x')
     else:
         sp_var = _to_sympy(var)
-    return sp.solve(sp_eq, sp_var)
+    res = sp.solve(sp_eq, sp_var)
+    if isinstance(res, list):
+        if len(res) > 0 and isinstance(res[0], (int, float, complex, sp.Number)):
+            return KheraMATArray([float(x) if isinstance(x, sp.Number) else x for x in res])
+        return KheraMATArray(res)
+    return res
 
 def km_simplify(expr):
     sp_expr = _to_sympy(expr)

@@ -57,8 +57,16 @@ class KheraMATArray:
                 return KheraMATArray(self._array.flatten(order='F')[py_idx])
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
-            r_idx = slice(None) if r == ":" else ((r._array.astype(int) - 1) if isinstance(r, KheraMATArray) else int(r) - 1)
-            c_idx = slice(None) if c == ":" else ((c._array.astype(int) - 1) if isinstance(c, KheraMATArray) else int(c) - 1)
+            if isinstance(r, KheraMATArray):
+                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.astype(int) - 1))
+            else:
+                r_idx = slice(None) if r == ":" else int(r) - 1
+
+            if isinstance(c, KheraMATArray):
+                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.astype(int) - 1))
+            else:
+                c_idx = slice(None) if c == ":" else int(c) - 1
+
             return KheraMATArray(self._array[r_idx, c_idx])
         else:
             raise IndexError("Only 1D and 2D indexing currently supported.")
@@ -170,6 +178,9 @@ class KheraMATArray:
         return KheraMATArray(self._array >= b)
 
     def __str__(self) -> str:
+        if self._array.size == 0:
+            r, c = self._array.shape
+            return f"   Empty matrix: {r}-by-{c}"
         if self._array.shape == (1, 1):
             val = self._array[0, 0]
             if isinstance(val, (float, np.floating)):

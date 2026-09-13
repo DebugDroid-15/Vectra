@@ -303,9 +303,61 @@ class PlotManager:
             ax.set_zlabel(text)
         self._refresh()
 
-    def hold(self, flag: str = "on") -> None:
-        flag_str = str(flag).lower()
-        self.hold_on = flag_str in ("on", "1", "true")
+    def surf(self, X, Y=None, Z=None):
+        if not self.active_canvas: return
+        if Z is None:
+            Z_arr = X._array if hasattr(X, "_array") else np.array(X)
+            X_arr, Y_arr = np.meshgrid(np.arange(1, Z_arr.shape[1] + 1), np.arange(1, Z_arr.shape[0] + 1))
+        else:
+            X_arr = X._array if hasattr(X, "_array") else np.array(X)
+            Y_arr = Y._array if hasattr(Y, "_array") else np.array(Y)
+            Z_arr = Z._array if hasattr(Z, "_array") else np.array(Z)
+        
+        self.active_canvas.fig.clf()
+        ax = self.active_canvas.fig.add_subplot(111, projection='3d')
+        surf_obj = ax.plot_surface(X_arr, Y_arr, Z_arr, cmap='viridis', edgecolor='none')
+        self.active_canvas.fig.colorbar(surf_obj, ax=ax, shrink=0.5, aspect=5)
+        self.current_axes = ax
+        self._refresh()
+
+    def mesh(self, X, Y=None, Z=None):
+        if not self.active_canvas: return
+        if Z is None:
+            Z_arr = X._array if hasattr(X, "_array") else np.array(X)
+            X_arr, Y_arr = np.meshgrid(np.arange(1, Z_arr.shape[1] + 1), np.arange(1, Z_arr.shape[0] + 1))
+        else:
+            X_arr = X._array if hasattr(X, "_array") else np.array(X)
+            Y_arr = Y._array if hasattr(Y, "_array") else np.array(Y)
+            Z_arr = Z._array if hasattr(Z, "_array") else np.array(Z)
+        
+        self.active_canvas.fig.clf()
+        ax = self.active_canvas.fig.add_subplot(111, projection='3d')
+        ax.plot_wireframe(X_arr, Y_arr, Z_arr, color='blue', linewidth=0.5)
+        self.current_axes = ax
+        self._refresh()
+
+    def quiver(self, X, Y, U, V):
+        ax = self.get_axes()
+        if not ax: return
+        if not self.hold_on: ax.cla()
+        x_arr = X._array if hasattr(X, "_array") else np.array(X)
+        y_arr = Y._array if hasattr(Y, "_array") else np.array(Y)
+        u_arr = U._array if hasattr(U, "_array") else np.array(U)
+        v_arr = V._array if hasattr(V, "_array") else np.array(V)
+        ax.quiver(x_arr, y_arr, u_arr, v_arr)
+        self._refresh()
+
+    def gcf(self):
+        return self.active_canvas.fig if self.active_canvas else None
+
+    def gca(self):
+        return self.get_axes()
+
+    def close(self, *args) -> None:
+        if not self.active_canvas: return
+        self.active_canvas.fig.clf()
+        self.current_axes = None
+        self._refresh()
 
 def km_plot(*args): PlotManager.get_instance().plot(*args)
 def km_scatter(x, y, *args): PlotManager.get_instance().scatter(x, y, *args)
@@ -324,6 +376,11 @@ def km_ylim(*args): PlotManager.get_instance().ylim(*args)
 def km_text(*args): PlotManager.get_instance().text(*args)
 def km_gtext(*args): PlotManager.get_instance().gtext(*args)
 def km_hold(flag="on"): PlotManager.get_instance().hold(flag)
+def km_surf(X, Y=None, Z=None): PlotManager.get_instance().surf(X, Y, Z)
+def km_mesh(X, Y=None, Z=None): PlotManager.get_instance().mesh(X, Y, Z)
+def km_quiver(X, Y, U, V): PlotManager.get_instance().quiver(X, Y, U, V)
+def km_gcf(): return PlotManager.get_instance().gcf()
+def km_gca(): return PlotManager.get_instance().gca()
 
 PLOTTING_FUNCTIONS: Dict[str, Callable] = {
     "plot": km_plot,
@@ -343,4 +400,9 @@ PLOTTING_FUNCTIONS: Dict[str, Callable] = {
     "text": km_text,
     "gtext": km_gtext,
     "hold": km_hold,
+    "surf": km_surf,
+    "mesh": km_mesh,
+    "quiver": km_quiver,
+    "gcf": km_gcf,
+    "gca": km_gca,
 }

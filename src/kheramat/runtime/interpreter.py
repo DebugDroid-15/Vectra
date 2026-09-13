@@ -182,6 +182,11 @@ class Interpreter:
         if hasattr(left, "_array") and isinstance(left, KheraMATArray):
             left = left._array.item() if left._array.size == 1 else left._array
 
+        import sympy as sp
+        if isinstance(left, sp.Basic) or isinstance(right, sp.Basic):
+            if node.op == '==': return sp.Eq(left, right)
+            elif node.op == '~=': return sp.Ne(left, right)
+
         if node.op == '+': return left + right
         elif node.op == '-': return left - right
         elif node.op in ('*', '.*'): return left * right
@@ -194,11 +199,14 @@ class Interpreter:
 
     def visit_AssignmentNode(self, node: AssignmentNode) -> Optional[str]:
         val = self.visit(node.value)
+        import sympy as sp
+        from ..toolbox.symbolic import clean_sym_str
         if isinstance(node.target, IdentifierNode):
             name = node.target.name
             self.workspace.set(name, val)
             if not node.suppress_output:
-                return f"\n{name} =\n\n{val}\n"
+                formatted_val = clean_sym_str(val) if isinstance(val, sp.Basic) else str(val)
+                return f"\n{name} =\n\n{formatted_val}\n"
         elif isinstance(node.target, (IndexingNode, CallNode)):
             if isinstance(node.target, IndexingNode):
                 target_name = node.target.target.name if isinstance(node.target.target, IdentifierNode) else None
@@ -296,14 +304,14 @@ class Interpreter:
 
         args = [self.visit(arg) for arg in node.args]
 
-        if node.func_name in self.functions:
-            func = self.functions[node.func_name]
-            return func(*args)
-
         if self.workspace.has(node.func_name):
             val = self.workspace.get(node.func_name)
             if isinstance(val, KheraMATArray):
                 return val.get_index(*args)
+
+        if node.func_name in self.functions:
+            func = self.functions[node.func_name]
+            return func(*args)
 
         # Dynamic fallback for NumPy and SciPy functions
         if hasattr(np, node.func_name):
@@ -328,8 +336,25 @@ class Interpreter:
         raise InterpreterError(f"Undefined function or variable '{node.func_name}'.")
 
     def visit_IndexingNode(self, node: IndexingNode) -> Any:
-        target = self.visit(node.target)
         idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
+        if isinstance(node.target, IdentifierNode):
+            func_name = node.target.name
+            if self.workspace.has(func_name):
+                val = self.workspace.get(func_name)
+                if isinstance(val, KheraMATArray):
+                    return val.get_index(*idx_vals)
+            if func_name in self.functions:
+                func = self.functions[func_name]
+                return func(*idx_vals)
+            if hasattr(np, func_name):
+                raw_args = [a._array if isinstance(a, KheraMATArray) else a for a in idx_vals]
+                res = getattr(np, func_name)(*raw_args)
+                if isinstance(res, np.ndarray):
+                    return KheraMATArray(res)
+                elif isinstance(res, (int, float, complex, np.number)):
+                    return KheraMATArray(res)
+                return res
+        target = self.visit(node.target)
         if isinstance(target, KheraMATArray):
             return target.get_index(*idx_vals)
         raise InterpreterError("Indexing standard non-array object is invalid.")
@@ -338,7 +363,10 @@ class Interpreter:
         val = self.visit(node.expr)
         if val is not None and not node.suppress_output:
             self.workspace.set("ans", val)
-            return f"\nans =\n\n{val}\n"
+            import sympy as sp
+            from ..toolbox.symbolic import clean_sym_str
+            formatted_val = clean_sym_str(val) if isinstance(val, sp.Basic) else str(val)
+            return f"\nans =\n\n{formatted_val}\n"
         return None
 
     def visit_IfNode(self, node: IfNode) -> Optional[str]:

@@ -320,10 +320,7 @@ class Parser:
                         if not self._match(TokenType.COMMA):
                             break
                 self._expect(TokenType.RPAREN, "Expected ')'")
-                if isinstance(expr, IdentifierNode):
-                    expr = CallNode(expr.name, args)
-                else:
-                    expr = IndexingNode(expr, args)
+                expr = IndexingNode(expr, args)
             else:
                 break
         return expr

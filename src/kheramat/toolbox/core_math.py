@@ -94,16 +94,20 @@ def _format_matlab(fmt: str, *args) -> str:
     fmt_str = str(fmt._array.item() if hasattr(fmt, "_array") else fmt)
     # Convert escaped newlines
     fmt_str = fmt_str.replace("\\n", "\n").replace("\\t", "\t")
+    # Convert %i to %d for Python % operator compatibility
+    import re
+    fmt_str = re.sub(r'%([0-9\.\-+]*)[iI]', r'%\1d', fmt_str)
     
     clean_args = []
     for arg in args:
         if hasattr(arg, "_array"):
             arr = arg._array
             if arr.size == 1:
-                clean_args.append(arr.item())
+                item = arr.item()
+                clean_args.append(int(item) if isinstance(item, (np.integer, bool)) else (float(item) if isinstance(item, np.floating) else item))
             else:
                 for item in arr.flatten(order='F'):
-                    clean_args.append(item)
+                    clean_args.append(int(item) if isinstance(item, (np.integer, bool)) else (float(item) if isinstance(item, np.floating) else item))
         else:
             clean_args.append(arg)
     
@@ -320,6 +324,13 @@ def km_fzero(func_name, x0) -> KheraMATArray:
     x_val = float(_to_arr(x0).item())
     res = opt.fsolve(lambda x: eval(fname)(x), x_val)
     return KheraMATArray(res[0])
+def km_assert(cond, msg="Assertion failed"):
+    c_arr = _to_arr(cond)
+    b = bool(np.all(c_arr))
+    if not b:
+        msg_str = str(msg._array.item() if hasattr(msg, "_array") else msg)
+        raise AssertionError(msg_str)
+    return None
 
 CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
     "zeros": km_zeros,
@@ -416,4 +427,5 @@ CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
     "disp": km_disp,
     "fprintf": km_fprintf,
     "sprintf": km_sprintf,
+    "assert": km_assert,
 }

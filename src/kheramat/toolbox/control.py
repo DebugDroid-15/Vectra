@@ -60,6 +60,8 @@ def km_zero(sys_obj) -> KheraMATArray:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     zeros = sys_obj.sys.zeros
+    if zeros.size == 0:
+        return KheraMATArray(np.empty((0, 1)))
     return KheraMATArray(zeros.reshape((-1, 1)))
 
 CONTROL_FUNCTIONS: Dict[str, Callable] = {
