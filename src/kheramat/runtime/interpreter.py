@@ -276,6 +276,16 @@ class Interpreter:
         return None
 
     def visit_CallNode(self, node: CallNode) -> Any:
+        if node.func_name == "syms":
+            import sympy as sp
+            created = []
+            for arg_node in node.args:
+                sym_name = arg_node.name if isinstance(arg_node, IdentifierNode) else str(arg_node.value)
+                sym_obj = sp.Symbol(sym_name)
+                self.workspace.set(sym_name, sym_obj)
+                created.append(sym_obj)
+            return created[0] if len(created) == 1 else tuple(created)
+
         args = [self.visit(arg) for arg in node.args]
 
         if node.func_name in self.functions:
