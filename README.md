@@ -95,17 +95,15 @@ Vectra is structured as a layered system separating core language parsing, runti
 
 ---
 
-##  Installation & Quick Start
+## 📥 Installation & Quick Start
 
-### Prerequisites
-* **Operating System**: Windows 10/11, Linux, or macOS.
-* **Python**: Python 3.10, 3.11, 3.12, or 3.13.
+For detailed step-by-step instructions across all platforms (Windows, Linux, macOS), see the official **[INSTALL.md](INSTALL.md)** guide.
 
-### Quick Setup
+### Quick Setup (Windows)
 
 1. **Clone the Repository**:
    ```bash
-   git clone https.github.com/DebugDroid-15/Vectra.git
+   git clone https://github.com/DebugDroid-15/Vectra.git
    cd Vectra
    ```
 
@@ -114,21 +112,13 @@ Vectra is structured as a layered system separating core language parsing, runti
    ```cmd
    Vectra.bat
    ```
-   *`Vectra.bat` automatically isolates PATH DLL conflicts, creates/updates a local `.venv`, installs missing dependencies via `pyproject.toml`, and launches the Desktop App.*
+   *`Vectra.bat` automatically scans your system, displays live progress percentage & ETA, builds the local `.venv`, installs dependencies, and launches Vectra Desktop.*
 
-3. **Manual Virtual Environment Setup**:
+3. **Manual Virtual Environment Setup (Linux/macOS)**:
    ```bash
-   python -m venv .venv
-   # Windows:
-   .venv\Scripts\activate
-   # Linux/macOS:
-   source .venv/bin/activate
-
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    pip install -e .
-   ```
-
-4. **Start Desktop Application**:
-   ```bash
    python -m kheramat.gui.app
    ```
 
