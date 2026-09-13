@@ -14,6 +14,7 @@ from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as Navigation
 from matplotlib.figure import Figure
 
 from ..runtime.interpreter import Interpreter
+from ..services import ExecutionService, WorkspaceService
 from ..toolbox.plotting import PlotManager
 from .code_editor import CodeEditor
 
@@ -112,6 +113,8 @@ class MainWindow(QMainWindow):
         self.resize(1280, 800)
 
         self.interpreter = Interpreter()
+        self.exec_service = ExecutionService(self.interpreter)
+        self.ws_service = WorkspaceService(self.interpreter.workspace)
         self.is_dark_mode = True
         self._setup_ui()
 

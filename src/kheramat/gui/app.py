@@ -13,42 +13,16 @@ except Exception:
 # 2. Fix Conda / Windows DLL loading conflict for PySide6
 if sys.platform == "win32":
     try:
-        # Sanitize PATH if venv was created from Anaconda/Miniconda base
-        current_path = os.environ.get("PATH", "")
-        clean_path_parts = [
-            p for p in current_path.split(os.pathsep)
-            if not ("anaconda" in p.lower() or "miniconda" in p.lower()) or (".venv" in p.lower())
-        ]
-        
         import PySide6
         pyside_dir = os.path.dirname(PySide6.__file__)
-        
-        # Add shiboken6 directory if present
-        shiboken_dir = os.path.join(os.path.dirname(pyside_dir), "shiboken6")
-        
-        dll_dirs = [pyside_dir, os.path.join(pyside_dir, "plugins"), os.path.join(pyside_dir, "plugins", "platforms")]
-        if os.path.exists(shiboken_dir):
-            dll_dirs.insert(0, shiboken_dir)
-            
+        # Add PySide6 directory to top of DLL search paths
         if hasattr(os, "add_dll_directory"):
-            for d in dll_dirs:
-                if os.path.exists(d):
-                    try:
-                        os.add_dll_directory(d)
-                    except Exception:
-                        pass
-        
-        # Build prioritized PATH with PySide6 DLL dirs first
-        new_path = os.pathsep.join(dll_dirs) + os.pathsep + os.pathsep.join(clean_path_parts)
-        os.environ["PATH"] = new_path
-        
-        # Use Windows API to enable search in application & user-added directories
-        try:
-            import ctypes
-            # LOAD_LIBRARY_SEARCH_DEFAULT_DIRS (0x00001000) | LOAD_LIBRARY_SEARCH_USER_DIRS (0x00000400)
-            ctypes.windll.kernel32.SetDefaultDllDirectories(0x00001400)
-        except Exception:
-            pass
+            os.add_dll_directory(pyside_dir)
+            plugins_dir = os.path.join(pyside_dir, "plugins")
+            if os.path.exists(plugins_dir):
+                os.add_dll_directory(plugins_dir)
+        # Prepend PySide6 directory to system PATH to override Anaconda's Library\bin DLLs
+        os.environ["PATH"] = pyside_dir + os.pathsep + os.path.join(pyside_dir, "plugins", "platforms") + os.pathsep + os.environ.get("PATH", "")
     except Exception as e:
         if 'logger' in locals():
             logger.warning(f"Could not configure PySide6 DLL directory: {e}")
