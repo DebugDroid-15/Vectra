@@ -67,19 +67,23 @@ def setup_environment():
                 if not os.path.exists(venv_python):
                     venv_python = python_exe
 
-                # Run pip install WITHOUT silent suppression so output is visible if needed, but clean
-                cmd = [venv_python, "-m", "pip", "install", "--no-warn-script-location", "PySide6", "numpy", "matplotlib", "scipy", "sympy"]
-                res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                if res.returncode != 0:
-                    print(f"\n[WARNING] Core package install warning: {res.stdout[-300:] if res.stdout else 'Unknown'}")
+                # Check if core dependencies are already present to avoid pip overhead
+                check_cmd = [venv_python, "-c", "import PySide6, numpy, matplotlib"]
+                check_res = subprocess.run(check_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if check_res.returncode != 0:
+                    cmd = [venv_python, "-m", "pip", "install", "--no-warn-script-location", "PySide6", "numpy", "matplotlib", "scipy", "sympy"]
+                    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
             elif idx == 3:
                 venv_python = os.path.join(venv_dir, "Scripts", "python.exe") if os.name == 'nt' else os.path.join(venv_dir, "bin", "python")
                 if not os.path.exists(venv_python):
                     venv_python = python_exe
 
-                cmd = [venv_python, "-m", "pip", "install", "--no-warn-script-location", "-e", project_root]
-                subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                check_cmd = [venv_python, "-c", "import kheramat"]
+                check_res = subprocess.run(check_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if check_res.returncode != 0:
+                    cmd = [venv_python, "-m", "pip", "install", "--no-warn-script-location", "-e", project_root]
+                    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
             elif idx == 4:
                 logs_dir = os.path.join(os.path.expanduser("~"), ".vectra", "logs")
