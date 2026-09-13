@@ -95,7 +95,7 @@ Vectra is structured as a layered system separating core language parsing, runti
 
 ---
 
-## 📥 Installation & Quick Start
+##  Installation & Quick Start
 
 ### Prerequisites
 * **Operating System**: Windows 10/11, Linux, or macOS.
