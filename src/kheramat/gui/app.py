@@ -100,35 +100,18 @@ def main():
         splash_widget.setWindowOpacity(1.0)
         splash_widget.show()
         app.processEvents()
-        
         splash = splash_widget
 
     window = MainWindow()
     if os.path.exists(icon_path):
         window.setWindowIcon(QIcon(icon_path))
 
-    def finish_splash():
-        if splash:
-            # Fade out animation over 600ms
-            anim = QPropertyAnimation(splash, b"windowOpacity")
-            anim.setDuration(600)
-            anim.setStartValue(1.0)
-            anim.setEndValue(0.0)
-            anim.setEasingCurve(QEasingCurve.OutCubic)
-            
-            def show_main():
-                splash.close()
-                window.show()
-                
-            anim.finished.connect(show_main)
-            anim.start(QPropertyAnimation.DeleteWhenStopped)
-            # Keep reference to avoid garbage collection during animation
-            splash.anim = anim
-        else:
-            window.show()
+    window.show()
 
-    # Hold splash screen visible for 3 seconds (3000 ms) before fading out
-    QTimer.singleShot(3000, finish_splash)
+    if splash:
+        def close_splash():
+            splash.close()
+        QTimer.singleShot(1500, close_splash)
     
     sys.exit(app.exec())
 
