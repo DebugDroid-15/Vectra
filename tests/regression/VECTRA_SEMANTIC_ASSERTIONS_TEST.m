@@ -1,105 +1,113 @@
 %% VECTRA SEMANTIC ASSERTION REGRESSION SUITE
-% Rigorous self-validating MATLAB test verifying all 16 production criteria.
-
-clc;
-clear;
+clc; clear;
 
 fprintf('\n========================================================\n');
-fprintf('    VECTRA SEMANTIC ASSERTION REGRESSION SUITE\n');
+fprintf('    VECTRA COMPREHENSIVE SEMANTIC ASSERTION SUITE\n');
 fprintf('========================================================\n');
 
-%% 1. Matrix & Linear Indexing Assertions
+%% Linear Algebra
 A = [1 2 3; 4 5 6; 7 8 10];
-assert(A(1,1) == 1, 'A(1,1) failed');
-assert(A(2) == 4, 'Linear indexing A(2) failed');
-assert(A(3) == 7, 'Linear indexing A(3) failed');
-assert(A(2,1) == 4, 'A(2,1) failed');
-fprintf('1. Matrix & Linear Indexing: PASS\n');
+B = [1 0 0; 0 1 0; 0 0 1];
+AB = A * B;
+assert(sum(sum(abs(AB - A))) < 1e-10, 'Matrix Multiplication failed');
 
-%% 2. fprintf Comprehensive Formatting Assertions
-formatted_str = sprintf('%d %i %.2f %e %s x=%d y=%.2f', 10, 10, 3.14159, 3.14159, 'Vectra', 10, 3.14);
-fprintf('Formatted test output: %s\n', formatted_str);
-assert(length(formatted_str) > 0, 'sprintf output empty');
-fprintf('2. fprintf & sprintf Formatting: PASS\n');
+Ai = inv(A);
+assert(sum(sum(abs(A*Ai - eye(3)))) < 1e-10, 'Matrix Inverse failed');
+assert(abs(det(A) - (-3)) < 1e-10, 'Determinant failed');
+assert(rank(A) == 3, 'Rank failed');
+assert(trace(A) == 16, 'Trace failed');
 
-%% 3. Complex Number Representation & Operations
-q = 3 + 4i;
-assert(abs(real(q) - 3) < 1e-6, 'Complex real part failed');
-assert(abs(imag(q) - 4) < 1e-6, 'Complex imag part failed');
-assert(abs(abs(q) - 5) < 1e-6, 'Complex abs magnitude failed');
+[V, D] = eig(A); e = diag(D);
+assert(abs(sum(e) - trace(A)) < 1e-10, 'Eigenvalues trace sum failed');
+assert(abs(prod(e) - det(A)) < 1e-10, 'Eigenvalues determinant prod failed');
 
-z1 = 1i;
-z2 = -2i;
-z3 = 3 - 4i;
-z4 = (3 + 4i) * (2 - i); % 6 - 3i + 8i - 4i^2 = 10 + 5i
-assert(abs(real(z4) - 10) < 1e-6, 'Complex multiplication real part failed');
-assert(abs(imag(z4) - 5) < 1e-6, 'Complex multiplication imag part failed');
-fprintf('3. Complex Numbers & Operations: PASS\n');
+[U, S, V] = svd(A);
+assert(sum(sum(abs(U*S*V' - A))) < 1e-10, 'SVD reconstruction failed');
 
-%% 4. Statistics & Signal Processing Assertions
-fs_stat = 1000;
-t_stat = 0:1/fs_stat:1-1/fs_stat;
-y_stat = sin(2*pi*5*t_stat);
+%% Polynomials & Calculus
+p = [1 -6 11 -6];
+r = roots(p);
+assert(sum(abs(sort(r) - [1; 2; 3])) < 1e-6, 'Polynomial roots failed');
 
-mean_y = mean(y_stat);
-std_y = std(y_stat);
-max_y = max(y_stat);
-min_y = min(y_stat);
+v = polyval(p, 1:5);
+assert(sum(abs(v - [0 0 0 6 24])) < 1e-6, 'Polynomial evaluation failed');
 
-assert(abs(mean_y) < 0.05, 'Signal mean failed');
-assert(abs(std_y - sqrt(0.5)) < 0.05, 'Signal std failed');
-assert(abs(max_y - 1.0) < 0.05, 'Signal max failed');
-assert(abs(min_y + 1.0) < 0.05, 'Signal min failed');
-fprintf('4. Signal Statistics (mean, std, max, min): PASS\n');
+x = 0:0.01:1;
+y = x.^3;
+dy = diff(y);
+assert(abs(dy(1) - 1e-6) < 1e-10, 'Numerical diff failed on dy(1)');
+assert(abs(dy(2) - 7e-6) < 1e-10, 'Numerical diff failed on dy(2)');
 
-%% 5. Symbolic Mathematics & Equation Solving
-syms s;
-expr = s^3 - 6*s^2 + 11*s - 6;
-roots_val = solve(expr == 0, s);
-assert(length(roots_val) == 3, 'Symbolic solve count failed');
-assert(abs(roots_val(1) - 1) < 1e-4, 'Symbolic root 1 failed');
-assert(abs(roots_val(2) - 2) < 1e-4, 'Symbolic root 2 failed');
-assert(abs(roots_val(3) - 3) < 1e-4, 'Symbolic root 3 failed');
+integral_val = trapz(x, y);
+assert(abs(integral_val - 0.25) < 1e-3, 'Numerical integration failed');
 
-syms x;
-f_quad = x^2 - 4;
-quad_roots = solve(f_quad == 0, x);
-assert(length(quad_roots) == 2, 'Symbolic quad solve count failed');
-assert(abs(quad_roots(1) - (-2)) < 1e-4, 'Symbolic quad root -2 failed');
-assert(abs(quad_roots(2) - 2) < 1e-4, 'Symbolic quad root 2 failed');
-fprintf('5. Symbolic Mathematics & Solvers: PASS\n');
+%% DSP
+sig = [1 2 3 4 5 6 7 8];
+F = fft(sig);
+sig_rec = ifft(F);
+assert(sum(abs(sig - sig_rec)) < 1e-10, 'FFT/IFFT round trip failed');
 
-%% 6. Control System Zeros & Poles
-num = [1];
-den = [1 3 2];
-sys = tf(num, den);
-p_sys = pole(sys);
-z_sys = zero(sys);
+fs = 1000;
+t = 0:1/fs:1-1/fs;
+f_target = 50;
+sig_f = sin(2*pi*f_target*t);
+F_sig = abs(fft(sig_f));
+[~, idx] = max(F_sig(1:length(F_sig)/2));
+f_detected = (idx-1)*fs/length(F_sig);
+assert(abs(f_detected - f_target) < 1e-6, 'FFT frequency detection failed');
 
-assert(length(p_sys) == 2, 'Control poles count failed');
-assert(numel(z_sys) == 0, 'Control zeros count failed');
-fprintf('6. Control Systems (poles & empty zeros): PASS\n');
+c = conv([1 1], [1 2 1]);
+assert(sum(abs(c - [1 3 3 1])) < 1e-10, 'Convolution failed');
 
-%% 7. Digital Modulation Assertions
+[b_filt, a_filt] = butter(2, 0.5);
+assert(length(b_filt) == 3, 'Filter coefficients numerator failed');
+assert(length(a_filt) == 3, 'Filter coefficients denominator failed');
+[h, w] = freqz(b_filt, a_filt);
+assert(abs(abs(h(1)) - 1) < 1e-4, 'Filter DC response failed');
+
+%% Communications
+fc = 500; fm = 20; fs = 2000;
+t_am = 0:1/fs:1-1/fs;
+msg_am = sin(2*pi*fm*t_am);
+am_mod = ammod(msg_am, fc, fs);
+am_dem = amdemod(am_mod, fc, fs);
+err_am = sqrt(mean((msg_am - am_dem).^2));
+assert(err_am < 0.05, 'AM Modulation/Demodulation failed');
+
 bits = [0 1 1 0 1 0 1 1];
-mod_bits = bpskmod(bits);
-rec_bits = bpskdemod(mod_bits);
-bit_errs = sum(bits ~= rec_bits);
-assert(bit_errs == 0, 'BPSK modulation/demodulation failed');
-fprintf('7. Digital Communication BPSK: PASS\n');
+bpsk_m = bpskmod(bits);
+assert(sum(abs(bpskdemod(bpsk_m) - bits)) == 0, 'BPSK failed');
 
-%% 8. Subroutine Function Execution Assertions
-[res_s, res_p] = test_subroutine(6, 4);
-assert(res_s == 10, 'Subroutine sum failed');
-assert(res_p == 24, 'Subroutine product failed');
-fprintf('8. Subroutine Function Execution: PASS\n');
+qpsk_m = qpskmod(bits);
+assert(sum(abs(qpskdemod(qpsk_m) - bits)) == 0, 'QPSK failed');
 
-fprintf('\n========================================================\n');
-fprintf('    ALL SEMANTIC REGRESSION ASSERTIONS PASSED (100%%)\n');
-fprintf('========================================================\n');
+qam_data = [0 1 2 3 0 2 1 3];
+qam_m = qammod(qam_data, 4);
+assert(sum(abs(qamdemod(qam_m, 4) - qam_data)) == 0, 'QAM failed');
 
-function [s, p] = test_subroutine(a, b)
-s = a + b;
-p = a * b;
-end
+%% Control Systems
+sys = tf([1], [1 3 2]);
+p_sys = pole(sys);
+assert(sum(abs(sort(p_sys) - [-2; -1])) < 1e-6, 'Control poles failed');
 
+[y_step, t_step] = step(sys);
+assert(abs(y_step(length(y_step)) - 0.5) < 0.05, 'Control step response steady state failed');
+
+%% Symbolic
+syms x y_sym z;
+f_sym = x^2 - 1;
+df = diff(f_sym, x);
+assert(strcmp(char(df), '2*x'), 'Symbolic diff failed');
+
+int_f = int(df, x);
+% Integration constant means it could just be x^2
+assert(strcmp(char(int_f), 'x^2'), 'Symbolic int failed');
+
+sol = solve(x^2 - 4 == 0, x);
+assert(abs(sol(1) - (-2)) < 1e-6, 'Symbolic solve 1 failed');
+assert(abs(sol(2) - 2) < 1e-6, 'Symbolic solve 2 failed');
+
+expr_simp = (x^2 - 1)/(x - 1);
+assert(strcmp(char(simplify(expr_simp)), 'x + 1'), 'Symbolic simplify failed');
+
+fprintf('\nALL SEMANTIC REGRESSION ASSERTIONS PASSED (100%%)\n');

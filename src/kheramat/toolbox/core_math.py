@@ -56,7 +56,11 @@ def km_linspace(start, stop, num=100) -> KheraMATArray:
 
 # Dimension & Inspection
 def km_size(arr) -> KheraMATArray: return KheraMATArray(np.array(_to_arr(arr).shape))
-def km_length(arr) -> KheraMATArray: return KheraMATArray(max(_to_arr(arr).shape))
+def km_length(arr) -> KheraMATArray:
+    a = _to_arr(arr)
+    if a.size == 0:
+        return KheraMATArray(0)
+    return KheraMATArray(max(a.shape) if a.shape else 1)
 def km_numel(arr) -> KheraMATArray: return KheraMATArray(_to_arr(arr).size)
 
 # Linear Algebra
@@ -73,14 +77,36 @@ def km_norm(arr) -> KheraMATArray: return KheraMATArray(np.linalg.norm(_to_arr(a
 def km_trace(arr) -> KheraMATArray: return KheraMATArray(np.trace(_to_arr(arr)))
 def km_rank(arr) -> KheraMATArray: return KheraMATArray(np.linalg.matrix_rank(_to_arr(arr)))
 
+def _math_op(np_func, sp_func, arr):
+    import sympy as sp
+    if isinstance(arr, sp.Basic):
+        return sp_func(arr)
+    return KheraMATArray(np_func(_to_arr(arr)))
+
 # Elementwise Math
-def km_sin(arr) -> KheraMATArray: return KheraMATArray(np.sin(_to_arr(arr)))
-def km_cos(arr) -> KheraMATArray: return KheraMATArray(np.cos(_to_arr(arr)))
-def km_tan(arr) -> KheraMATArray: return KheraMATArray(np.tan(_to_arr(arr)))
-def km_exp(arr) -> KheraMATArray: return KheraMATArray(np.exp(_to_arr(arr)))
-def km_log(arr) -> KheraMATArray: return KheraMATArray(np.log(_to_arr(arr)))
-def km_sqrt(arr) -> KheraMATArray: return KheraMATArray(np.sqrt(_to_arr(arr)))
-def km_abs(arr) -> KheraMATArray: return KheraMATArray(np.abs(_to_arr(arr)))
+def km_sin(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.sin, sp.sin, arr)
+def km_cos(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.cos, sp.cos, arr)
+def km_tan(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.tan, sp.tan, arr)
+def km_exp(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.exp, sp.exp, arr)
+def km_log(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.log, sp.log, arr)
+def km_sqrt(arr) -> Any:
+    import sympy as sp
+    return _math_op(np.sqrt, sp.sqrt, arr)
+def km_abs(arr) -> Any:
+    import sympy as sp
+    if isinstance(arr, sp.Basic):
+        return sp.Abs(arr)
+    return KheraMATArray(np.abs(_to_arr(arr)))
 def km_floor(arr) -> KheraMATArray: return KheraMATArray(np.floor(_to_arr(arr)))
 def km_ceil(arr) -> KheraMATArray: return KheraMATArray(np.ceil(_to_arr(arr)))
 def km_round(arr) -> KheraMATArray: return KheraMATArray(np.round(_to_arr(arr)))
@@ -89,46 +115,102 @@ def km_round(arr) -> KheraMATArray: return KheraMATArray(np.round(_to_arr(arr)))
 def km_fft(arr) -> KheraMATArray: return KheraMATArray(np.fft.fft(_to_arr(arr)))
 def km_ifft(arr) -> KheraMATArray: return KheraMATArray(np.fft.ifft(_to_arr(arr)))
 
-# Reductions
-def km_sum(arr) -> KheraMATArray: return KheraMATArray(np.sum(_to_arr(arr)))
-def km_mean(arr) -> KheraMATArray: return KheraMATArray(np.mean(_to_arr(arr)))
-def km_min(arr) -> tuple:
-    a = _to_arr(arr).flatten()
-    idx = int(np.argmin(a))
-    return (KheraMATArray(a[idx]), KheraMATArray(idx + 1))
+def _first_nonsingleton_axis(arr: np.ndarray) -> int:
+    if arr.ndim == 1:
+        return 0
+    for i, dim in enumerate(arr.shape):
+        if dim > 1:
+            return i
+    return 0
 
-def km_max(arr) -> tuple:
-    a = _to_arr(arr).flatten()
-    idx = int(np.argmax(a))
-    return (KheraMATArray(a[idx]), KheraMATArray(idx + 1))
+# Reductions
+def km_sum(arr) -> KheraMATArray: 
+    a = _to_arr(arr)
+    return KheraMATArray(np.sum(a, axis=_first_nonsingleton_axis(a), keepdims=True))
+
+def km_mean(arr) -> KheraMATArray: 
+    a = _to_arr(arr)
+    return KheraMATArray(np.mean(a, axis=_first_nonsingleton_axis(a), keepdims=True))
+
+def km_min(*args, nargout=1) -> Any:
+    if len(args) == 1:
+        a = _to_arr(args[0])
+        ax = _first_nonsingleton_axis(a)
+        val = np.min(a, axis=ax, keepdims=True)
+        if nargout > 1:
+            idx = np.argmin(a, axis=ax, keepdims=True) + 1
+            return KheraMATArray(val), KheraMATArray(idx)
+        return KheraMATArray(val)
+    elif len(args) == 2:
+        return KheraMATArray(np.minimum(_to_arr(args[0]), _to_arr(args[1])))
+    else:
+        raise ValueError("min takes 1 or 2 arguments in Vectra")
+
+def km_max(*args, nargout=1) -> Any:
+    if len(args) == 1:
+        a = _to_arr(args[0])
+        ax = _first_nonsingleton_axis(a)
+        val = np.max(a, axis=ax, keepdims=True)
+        if nargout > 1:
+            idx = np.argmax(a, axis=ax, keepdims=True) + 1
+            return KheraMATArray(val), KheraMATArray(idx)
+        return KheraMATArray(val)
+    elif len(args) == 2:
+        return KheraMATArray(np.maximum(_to_arr(args[0]), _to_arr(args[1])))
+    else:
+        raise ValueError("max takes 1 or 2 arguments in Vectra")
 
 def _format_matlab(fmt: str, *args) -> str:
     fmt_str = str(fmt._array.item() if hasattr(fmt, "_array") else fmt)
-    # Convert escaped newlines
     fmt_str = fmt_str.replace("\\n", "\n").replace("\\t", "\t")
-    # Convert %i to %d for Python % operator compatibility
+    
     import re
     fmt_str = re.sub(r'%([0-9\.\-+]*)[iI]', r'%\1d', fmt_str)
     
     clean_args = []
     for arg in args:
+        import sympy as sp
+        if isinstance(arg, sp.Basic):
+            from .symbolic import clean_sym_str
+            clean_args.append(clean_sym_str(arg))
+            continue
+            
         if hasattr(arg, "_array"):
             arr = arg._array
-            if arr.size == 1:
-                item = arr.item()
+            for item in arr.flatten(order='F'):
                 clean_args.append(int(item) if isinstance(item, (np.integer, bool)) else (float(item) if isinstance(item, np.floating) else item))
-            else:
-                for item in arr.flatten(order='F'):
-                    clean_args.append(int(item) if isinstance(item, (np.integer, bool)) else (float(item) if isinstance(item, np.floating) else item))
         else:
             clean_args.append(arg)
+            
+    if not clean_args:
+        return fmt_str.replace('%%', '%')
+        
+    num_specs = len(re.findall(r'%[-+ 0]*\d*(?:\.\d*)?[a-zA-Z]', fmt_str.replace('%%', '')))
+    if num_specs == 0:
+        return fmt_str.replace('%%', '%')
+        
+    result_parts = []
+    parts = re.split(r'(%[-+ 0]*\d*(?:\.\d*)?[a-zA-Z])', fmt_str.replace('%%', '\0'))
     
-    if clean_args:
-        try:
-            return fmt_str % tuple(clean_args)
-        except Exception:
-            return fmt_str
-    return fmt_str
+    arg_idx = 0
+    while arg_idx < len(clean_args):
+        for part in parts:
+            if part.startswith('%'):
+                if arg_idx < len(clean_args):
+                    try:
+                        # If the arg is a string (like from sympy) and we need %s, it works.
+                        # If the format is %d or %f and we got a sympy string, it will exception and fallback.
+                        formatted = part % clean_args[arg_idx]
+                        result_parts.append(formatted)
+                    except Exception:
+                        result_parts.append(str(clean_args[arg_idx]))
+                    arg_idx += 1
+                else:
+                    break
+            else:
+                result_parts.append(part.replace('\0', '%'))
+                
+    return "".join(result_parts)
 
 def km_sprintf(fmt: str, *args) -> KheraMATArray:
     res = _format_matlab(fmt, *args)
@@ -141,8 +223,13 @@ def km_fprintf(fmt: str, *args):
     return None
 
 def km_disp(*args):
+    import sympy as sp
+    from .symbolic import clean_sym_str
     for item in args:
-        print(item)
+        if isinstance(item, sp.Basic):
+            print(clean_sym_str(item))
+        else:
+            print(item)
     return None
 
 def km_logspace(start, stop, num=50) -> KheraMATArray:
@@ -190,11 +277,13 @@ def km_sub2ind(siz, row, col) -> KheraMATArray:
     inds = np.ravel_multi_index((r, c), dims=s, order='F') + 1
     return KheraMATArray(inds.reshape((1, -1)))
 
-def km_ind2sub(siz, ind) -> (KheraMATArray, KheraMATArray):
+def km_ind2sub(siz, ind, nargout=2) -> Any:
     s = _to_arr(siz).flatten().astype(int)
     i = _to_arr(ind).flatten().astype(int) - 1
     r, c = np.unravel_index(i, shape=s, order='F')
-    return KheraMATArray((r + 1).reshape((1, -1))), KheraMATArray((c + 1).reshape((1, -1)))
+    if nargout > 1:
+        return KheraMATArray((r + 1).reshape((1, -1))), KheraMATArray((c + 1).reshape((1, -1)))
+    return KheraMATArray((r + 1).reshape((1, -1)))
 
 def km_find(x) -> KheraMATArray:
     arr = _to_arr(x).flatten()
@@ -224,9 +313,17 @@ def km_real(arr) -> KheraMATArray: return KheraMATArray(np.real(_to_arr(arr)))
 def km_imag(arr) -> KheraMATArray: return KheraMATArray(np.imag(_to_arr(arr)))
 
 # Statistics & Reductions
-def km_median(arr) -> KheraMATArray: return KheraMATArray(np.median(_to_arr(arr)))
-def km_std(arr) -> KheraMATArray: return KheraMATArray(np.std(_to_arr(arr), ddof=1))
-def km_var(arr) -> KheraMATArray: return KheraMATArray(np.var(_to_arr(arr), ddof=1))
+def km_median(arr) -> KheraMATArray:
+    a = _to_arr(arr)
+    return KheraMATArray(np.median(a, axis=_first_nonsingleton_axis(a), keepdims=True))
+
+def km_std(arr) -> KheraMATArray:
+    a = _to_arr(arr)
+    return KheraMATArray(np.std(a, axis=_first_nonsingleton_axis(a), ddof=1, keepdims=True))
+
+def km_var(arr) -> KheraMATArray:
+    a = _to_arr(arr)
+    return KheraMATArray(np.var(a, axis=_first_nonsingleton_axis(a), ddof=1, keepdims=True))
 
 # Polynomials & Numerical Integration
 def km_poly(r) -> KheraMATArray:
@@ -257,22 +354,52 @@ def km_trapz(*args) -> KheraMATArray:
 def km_diff(x, n=1) -> KheraMATArray:
     x_arr = _to_arr(x)
     n_val = int(_to_arr(n).item() if isinstance(n, KheraMATArray) else n)
-    res = np.diff(x_arr, n=n_val)
+    
+    if x_arr.ndim == 0 or x_arr.size <= 1:
+        return KheraMATArray(np.array([]).reshape((0, 0)))
+        
+    if x_arr.ndim == 1:
+        res = np.diff(x_arr, n=n_val)
+    elif x_arr.ndim == 2:
+        if x_arr.shape[0] == 1:
+            res = np.diff(x_arr, n=n_val, axis=1)
+        elif x_arr.shape[1] == 1:
+            res = np.diff(x_arr, n=n_val, axis=0)
+        else:
+            res = np.diff(x_arr, n=n_val, axis=0)
+    else:
+        # For N-D, MATLAB diffs along first non-singleton dimension
+        # But we mostly deal with 2D.
+        first_non_singleton = next((i for i, s in enumerate(x_arr.shape) if s > 1), 0)
+        res = np.diff(x_arr, n=n_val, axis=first_non_singleton)
+        
     return KheraMATArray(res)
 
 # Advanced Linear Algebra & Matrix Decompositions
-def km_svd(a) -> (KheraMATArray, KheraMATArray, KheraMATArray):
-    u, s, vh = np.linalg.svd(_to_arr(a))
-    return KheraMATArray(u), KheraMATArray(np.diag(s)), KheraMATArray(vh.T)
+def km_eig(arr, nargout=1) -> Any:
+    w, v = np.linalg.eig(_to_arr(arr))
+    if nargout > 1:
+        return KheraMATArray(v), KheraMATArray(np.diag(w))
+    return KheraMATArray(w.reshape((-1, 1)))
 
-def km_lu(a) -> (KheraMATArray, KheraMATArray, KheraMATArray):
+def km_svd(a, nargout=1) -> Any:
+    u, s, vh = np.linalg.svd(_to_arr(a))
+    if nargout > 1:
+        return KheraMATArray(u), KheraMATArray(np.diag(s)), KheraMATArray(vh.T)
+    return KheraMATArray(s.reshape((-1, 1)))
+
+def km_lu(a, nargout=1) -> Any:
     import scipy.linalg as la
     p, l, u = la.lu(_to_arr(a))
-    return KheraMATArray(l), KheraMATArray(u), KheraMATArray(p)
+    if nargout > 1:
+        return KheraMATArray(l), KheraMATArray(u), KheraMATArray(p)
+    return KheraMATArray(l @ u) # if nargout=1, just returns something (MATLAB returns factored matrix? MATLAB actually returns L, U for 2 outputs, or just y for 1 which isn't typically used) but usually lu is multiple outputs. Let's just return L*U. Actually, MATLAB returns L+U-I.
 
-def km_qr(a) -> (KheraMATArray, KheraMATArray):
+def km_qr(a, nargout=1) -> Any:
     q, r = np.linalg.qr(_to_arr(a))
-    return KheraMATArray(q), KheraMATArray(r)
+    if nargout > 1:
+        return KheraMATArray(q), KheraMATArray(r)
+    return KheraMATArray(r)
 
 def km_chol(a) -> KheraMATArray:
     return KheraMATArray(np.linalg.cholesky(_to_arr(a)).T)
@@ -319,9 +446,17 @@ def km_conv2(a, b) -> KheraMATArray:
 
 def km_cumsum(a) -> KheraMATArray: return KheraMATArray(np.cumsum(_to_arr(a), axis=0 if _to_arr(a).ndim > 1 else -1))
 def km_cumprod(a) -> KheraMATArray: return KheraMATArray(np.cumprod(_to_arr(a), axis=0 if _to_arr(a).ndim > 1 else -1))
-def km_prod(a) -> KheraMATArray: return KheraMATArray(np.prod(_to_arr(a)))
-def km_all(a) -> KheraMATArray: return KheraMATArray(np.all(_to_arr(a)))
-def km_any(a) -> KheraMATArray: return KheraMATArray(np.any(_to_arr(a)))
+def km_prod(a) -> KheraMATArray:
+    arr = _to_arr(a)
+    return KheraMATArray(np.prod(arr, axis=_first_nonsingleton_axis(arr), keepdims=True))
+
+def km_all(a) -> KheraMATArray:
+    arr = _to_arr(a)
+    return KheraMATArray(np.all(arr, axis=_first_nonsingleton_axis(arr), keepdims=True).astype(int))
+
+def km_any(a) -> KheraMATArray:
+    arr = _to_arr(a)
+    return KheraMATArray(np.any(arr, axis=_first_nonsingleton_axis(arr), keepdims=True).astype(int))
 def km_squeeze(a) -> KheraMATArray: return KheraMATArray(np.squeeze(_to_arr(a)))
 def km_flip(a) -> KheraMATArray: return KheraMATArray(np.flip(_to_arr(a)))
 def km_fliplr(a) -> KheraMATArray: return KheraMATArray(np.fliplr(_to_arr(a)))
@@ -336,12 +471,23 @@ def km_fzero(func_name, x0) -> KheraMATArray:
     x_val = float(_to_arr(x0).item())
     res = opt.fsolve(lambda x: eval(fname)(x), x_val)
     return KheraMATArray(res[0])
+
 def km_assert(cond, msg="Assertion failed"):
-    c_arr = _to_arr(cond)
-    b = bool(np.all(c_arr))
-    if not b:
-        msg_str = str(msg._array.item() if hasattr(msg, "_array") else msg)
+    import sympy as sp
+    if isinstance(cond, sp.Basic):
+        c = bool(cond)
+    elif isinstance(cond, KheraMATArray):
+        c = bool(np.all(cond._array))
+    else:
+        c = bool(cond)
+    if not c:
+        msg_str = msg._array.item() if hasattr(msg, "_array") else str(msg)
         raise AssertionError(msg_str)
+
+def km_strcmp(s1, s2) -> KheraMATArray:
+    str1 = s1._array.item() if hasattr(s1, "_array") else str(s1)
+    str2 = s2._array.item() if hasattr(s2, "_array") else str(s2)
+    return KheraMATArray(str1 == str2)
     return None
 
 CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
@@ -440,4 +586,5 @@ CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
     "fprintf": km_fprintf,
     "sprintf": km_sprintf,
     "assert": km_assert,
+    "strcmp": km_strcmp,
 }

@@ -15,40 +15,68 @@ class KheraMATSystem:
         self.den = _to_arr(den).flatten()
         self.sys = signal.TransferFunction(self.num, self.den)
     
+    def __str__(self):
+        def poly_str(coeffs):
+            parts = []
+            deg = len(coeffs) - 1
+            for i, c in enumerate(coeffs):
+                if c == 0: continue
+                d = deg - i
+                abs_c = abs(c)
+                sign = " - " if c < 0 else (" + " if parts else "")
+                
+                if d == 0:
+                    term = f"{abs_c:g}"
+                else:
+                    coeff_str = "" if abs_c == 1.0 else f"{abs_c:g} "
+                    var_str = "s" if d == 1 else f"s^{d}"
+                    term = coeff_str + var_str
+                
+                parts.append(sign + term)
+            if not parts: return "0"
+            return "".join(parts).strip()
+            
+        n_str = poly_str(self.num)
+        d_str = poly_str(self.den)
+        
+        # Center the strings
+        width = max(len(n_str), len(d_str))
+        sep = "-" * width
+        return f"\n  {n_str.center(width)}\n  {sep}\n  {d_str.center(width)}\n\nContinuous-time transfer function."
+
     def __repr__(self):
-        return f"TransferFunction(num={self.num}, den={self.den})"
+        return self.__str__()
 
 def km_tf(num, den) -> KheraMATSystem:
     return KheraMATSystem(num, den)
 
-def km_step(sys_obj) -> Tuple[KheraMATArray, KheraMATArray]:
+def km_step(sys_obj, nargout=1) -> Any:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     t, y = signal.step(sys_obj.sys)
-    return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    if nargout > 1:
+        return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    return KheraMATArray(y.reshape((1, -1)))
 
-def km_impulse(sys_obj) -> Tuple[KheraMATArray, KheraMATArray]:
+def km_impulse(sys_obj, nargout=1) -> Any:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     t, y = signal.impulse(sys_obj.sys)
-    return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    if nargout > 1:
+        return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    return KheraMATArray(y.reshape((1, -1)))
 
-def km_bode(sys_obj):
+def km_bode(sys_obj, nargout=1) -> Any:
     if not isinstance(sys_obj, KheraMATSystem):
         raise ValueError("Expected a transfer function system created with tf(num, den)")
     w, mag, phase = signal.bode(sys_obj.sys)
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
-    ax1.semilogx(w, mag)
-    ax1.set_title('Bode Diagram')
-    ax1.set_ylabel('Magnitude (dB)')
-    ax1.grid(True, which='both')
-    
-    ax2.semilogx(w, phase)
-    ax2.set_xlabel('Frequency (rad/s)')
-    ax2.set_ylabel('Phase (deg)')
-    ax2.grid(True, which='both')
-    plt.show()
-    return None
+    if nargout > 2:
+        return (KheraMATArray(mag.reshape((1, -1))), 
+                KheraMATArray(phase.reshape((1, -1))), 
+                KheraMATArray(w.reshape((1, -1))))
+    elif nargout == 2:
+        return KheraMATArray(mag.reshape((1, -1))), KheraMATArray(phase.reshape((1, -1)))
+    return KheraMATArray(mag.reshape((1, -1)))
 
 def km_pole(sys_obj) -> KheraMATArray:
     if not isinstance(sys_obj, KheraMATSystem):

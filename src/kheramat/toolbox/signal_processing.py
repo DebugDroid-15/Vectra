@@ -63,48 +63,56 @@ def km_conv(x, h) -> KheraMATArray:
     res = np.convolve(x_arr, h_arr)
     return KheraMATArray(res.reshape((1, -1)))
 
-def km_deconv(y, c) -> (KheraMATArray, KheraMATArray):
+def km_deconv(y, c, nargout=2) -> Any:
     y_arr = _to_arr(y).flatten()
     c_arr = _to_arr(c).flatten()
     q, r = signal.deconvolve(y_arr, c_arr)
-    return KheraMATArray(q.reshape((1, -1))), KheraMATArray(r.reshape((1, -1)))
+    if nargout > 1:
+        return KheraMATArray(q), KheraMATArray(r)
+    return KheraMATArray(q)
 
 def km_xcorr(x, y=None) -> KheraMATArray:
     x_arr = _to_arr(x).flatten()
     if y is None:
-        res = np.correlate(x_arr, x_arr, mode='full')
+        y_arr = x_arr
     else:
         y_arr = _to_arr(y).flatten()
-        res = np.correlate(x_arr, y_arr, mode='full')
+    res = signal.correlate(x_arr, y_arr, mode='full')
     return KheraMATArray(res.reshape((1, -1)))
 
 def km_filter(b, a, x) -> KheraMATArray:
     b_arr = _to_arr(b).flatten()
     a_arr = _to_arr(a).flatten()
     x_arr = _to_arr(x).flatten()
-    res = signal.lfilter(b_arr, a_arr, x_arr)
-    return KheraMATArray(res.reshape((1, -1)))
+    y = signal.lfilter(b_arr, a_arr, x_arr)
+    return KheraMATArray(y.reshape((1, -1)))
 
-def km_freqz(b, a, worN=512, fs=None) -> (KheraMATArray, KheraMATArray):
+def km_freqz(b, a, worN=512, fs=None, nargout=1) -> Any:
     b_arr = _to_arr(b).flatten()
     a_arr = _to_arr(a).flatten()
-    n = int(_to_arr(worN).item() if isinstance(worN, KheraMATArray) else worN)
+    
+    kwargs = {}
     if fs is not None:
-        fs_val = float(_to_arr(fs).item() if isinstance(fs, KheraMATArray) else fs)
-        w, h = signal.freqz(b_arr, a_arr, worN=n, fs=fs_val)
-    else:
-        w, h = signal.freqz(b_arr, a_arr, worN=n)
-    return KheraMATArray(h.reshape((-1, 1))), KheraMATArray(w.reshape((-1, 1)))
+        kwargs['fs'] = float(_to_arr(fs).item())
+        
+    w, h = signal.freqz(b_arr, a_arr, worN=int(_to_arr(worN).item()), **kwargs)
+    if nargout > 1:
+        return KheraMATArray(h.reshape((1, -1))), KheraMATArray(w.reshape((1, -1)))
+    # If no output args, MATLAB plots the response. If 1, returns h. We'll return h.
+    return KheraMATArray(h.reshape((1, -1)))
 
-def km_impz(b, a, n=50) -> (KheraMATArray, KheraMATArray):
+def km_impz(b, a, n=50, nargout=1) -> Any:
     b_arr = _to_arr(b).flatten()
     a_arr = _to_arr(a).flatten()
-    n_pts = int(_to_arr(n).item() if isinstance(n, KheraMATArray) else n)
-    imp = np.zeros(n_pts)
-    imp[0] = 1.0
-    res = signal.lfilter(b_arr, a_arr, imp)
-    t = np.arange(n_pts)
-    return KheraMATArray(res.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    n_val = int(_to_arr(n).item())
+    
+    t = np.arange(n_val)
+    x = np.zeros(n_val)
+    x[0] = 1.0
+    y = signal.lfilter(b_arr, a_arr, x)
+    if nargout > 1:
+        return KheraMATArray(y.reshape((1, -1))), KheraMATArray(t.reshape((1, -1)))
+    return KheraMATArray(y.reshape((1, -1)))
 
 def km_fftshift(x) -> KheraMATArray:
     return KheraMATArray(np.fft.fftshift(_to_arr(x)))

@@ -224,7 +224,9 @@ class KheraMATArray:
             if isinstance(val, (float, np.floating)):
                 if np.isnan(val) or np.isinf(val):
                     return f"     {val}"
-                return f"    {val:.4f}".rstrip('0').rstrip('.') if (val % 1 != 0) else f"     {int(val)}"
+                if val == 0:
+                    return "     0"
+                return f"    {val:.4g}"
             return f"     {val}"
         
         # Matrix output formatting
@@ -237,10 +239,14 @@ class KheraMATArray:
                 if isinstance(v, (float, np.floating)):
                     if np.isnan(v) or np.isinf(v):
                         row_items.append(f"{v}")
-                    elif v % 1 != 0:
-                        row_items.append(f"{v:.4f}".rstrip('0').rstrip('.'))
+                    elif v == 0:
+                        row_items.append("   0")
                     else:
-                        row_items.append(f"{int(v):4d}")
+                        # MATLAB uses %g-like formatting with precision 4 or 5
+                        # We use .4g which gives 4 significant digits
+                        fmt_v = f"{v:.4g}"
+                        # Try to align it a bit
+                        row_items.append(fmt_v.rjust(6))
                 else:
                     row_items.append(str(v))
             row_str = "    " + "  ".join(row_items)

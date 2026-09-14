@@ -35,21 +35,27 @@ class Lexer:
         self.tokens = []
         
         while self.pos < len(self.source):
-            ch = self._peek()
+            ws_before = False
 
+            # Whitespace handling (preserve newlines for command termination)
+            while self._peek() in ' \t\r':
+                self._advance()
+                ws_before = True
+
+            ch = self._peek()
+            
             # Skip comments % ...
             if ch == '%':
                 while self._peek() not in ('\n', '\0'):
                     self._advance()
+                ws_before = True
                 continue
 
-            # Whitespace handling (preserve newlines for command termination)
-            if ch in ' \t\r':
-                self._advance()
-                continue
+            if ch == '\0':
+                break
 
             if ch == '\n':
-                self.tokens.append(Token(TokenType.NEWLINE, '\n', self.line, self.column))
+                self.tokens.append(Token(TokenType.NEWLINE, '\n', self.line, self.column, ws_before=ws_before))
                 self._advance()
                 continue
 
@@ -81,7 +87,7 @@ class Lexer:
                 if self._peek() in ('i', 'j') and not self._peek(1).isalnum():
                     self._advance()
                     val = complex(0, val)
-                self.tokens.append(Token(TokenType.NUMBER, val, start_line, start_col))
+                self.tokens.append(Token(TokenType.NUMBER, val, start_line, start_col, ws_before=ws_before))
                 continue
 
             # Identifiers and Keywords
@@ -91,7 +97,7 @@ class Lexer:
                     ident += self._advance()
                 
                 token_type = KEYWORDS.get(ident, TokenType.IDENTIFIER)
-                self.tokens.append(Token(token_type, ident, start_line, start_col))
+                self.tokens.append(Token(token_type, ident, start_line, start_col, ws_before=ws_before))
                 continue
 
             # Strings: "hello" or 'hello'
@@ -111,7 +117,7 @@ class Lexer:
 
                 if self._peek() == quote_char:
                     self._advance()
-                    self.tokens.append(Token(TokenType.STRING, string_val, start_line, start_col))
+                    self.tokens.append(Token(TokenType.STRING, string_val, start_line, start_col, ws_before=ws_before))
                     continue
                 else:
                     raise LexerError("Unterminated string literal", start_line, start_col)
@@ -132,56 +138,56 @@ class Lexer:
                 nxt = self._peek(1)
                 if nxt == '*':
                     self._advance(); self._advance()
-                    self.tokens.append(Token(TokenType.DOT_MUL, ".*", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT_MUL, ".*", start_line, start_col, ws_before=ws_before))
                     continue
                 elif nxt == '/':
                     self._advance(); self._advance()
-                    self.tokens.append(Token(TokenType.DOT_DIV, "./", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT_DIV, "./", start_line, start_col, ws_before=ws_before))
                     continue
                 elif nxt == '^':
                     self._advance(); self._advance()
-                    self.tokens.append(Token(TokenType.DOT_POW, ".^", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT_POW, ".^", start_line, start_col, ws_before=ws_before))
                     continue
                 elif nxt == "'":
                     self._advance(); self._advance()
-                    self.tokens.append(Token(TokenType.DOT_TRANSPOSE, ".'", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT_TRANSPOSE, ".'", start_line, start_col, ws_before=ws_before))
                     continue
                 elif not nxt.isdigit():
                     # Single dot accessor
                     self._advance()
-                    self.tokens.append(Token(TokenType.DOT, ".", start_line, start_col))
+                    self.tokens.append(Token(TokenType.DOT, ".", start_line, start_col, ws_before=ws_before))
                     continue
 
             # Single quote transpose
             if ch == "'" and self._is_transpose_context():
                 self._advance()
-                self.tokens.append(Token(TokenType.TRANSPOSE, "'", start_line, start_col))
+                self.tokens.append(Token(TokenType.TRANSPOSE, "'", start_line, start_col, ws_before=ws_before))
                 continue
 
             # Two-character operators
             if ch == '=' and self._peek(1) == '=':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.EQ, "==", start_line, start_col))
+                self.tokens.append(Token(TokenType.EQ, "==", start_line, start_col, ws_before=ws_before))
                 continue
             if (ch == '~' or ch == '!') and self._peek(1) == '=':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.NEQ, "~=", start_line, start_col))
+                self.tokens.append(Token(TokenType.NEQ, "~=", start_line, start_col, ws_before=ws_before))
                 continue
             if ch == '<' and self._peek(1) == '=':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.LTE, "<=", start_line, start_col))
+                self.tokens.append(Token(TokenType.LTE, "<=", start_line, start_col, ws_before=ws_before))
                 continue
             if ch == '>' and self._peek(1) == '=':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.GTE, ">=", start_line, start_col))
+                self.tokens.append(Token(TokenType.GTE, ">=", start_line, start_col, ws_before=ws_before))
                 continue
             if ch == '&' and self._peek(1) == '&':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.AND, "&&", start_line, start_col))
+                self.tokens.append(Token(TokenType.AND, "&&", start_line, start_col, ws_before=ws_before))
                 continue
             if ch == '|' and self._peek(1) == '|':
                 self._advance(); self._advance()
-                self.tokens.append(Token(TokenType.OR, "||", start_line, start_col))
+                self.tokens.append(Token(TokenType.OR, "||", start_line, start_col, ws_before=ws_before))
                 continue
 
             # Single character operators and punctuation
@@ -211,7 +217,7 @@ class Lexer:
             if ch in op_map:
                 ttype = op_map[ch]
                 self._advance()
-                self.tokens.append(Token(ttype, ch, start_line, start_col))
+                self.tokens.append(Token(ttype, ch, start_line, start_col, ws_before=ws_before))
                 continue
 
             raise LexerError(f"Unexpected character: {ch!r}", start_line, start_col)

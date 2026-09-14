@@ -72,14 +72,14 @@ KEYWORDS = {
 }
 
 class Token:
-    def __init__(self, token_type: TokenType, value: Any = None, line: int = 1, column: int = 1):
+    def __init__(self, token_type: TokenType, value: Any = None, line: int = 1, column: int = 1, ws_before: bool = False):
         self.type = token_type
         self.value = value
         self.line = line
         self.column = column
+        self.ws_before = ws_before
 
     def __repr__(self) -> str:
         if self.value is not None:
-            return f"Token({self.type.name}, {self.value!r}, line={self.line}, col={self.column})"
-        return f"Token({self.type.name}, line={self.line}, col={self.column})"
-
+            return f"Token({self.type.name}, {self.value!r}, line={self.line}, col={self.column}, ws={self.ws_before})"
+        return f"Token({self.type.name}, line={self.line}, col={self.column}, ws={self.ws_before})"

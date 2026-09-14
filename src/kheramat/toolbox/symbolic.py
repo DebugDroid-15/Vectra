@@ -18,11 +18,19 @@ def _to_sympy(expr: Any) -> Any:
         if arr.size == 1:
             val = arr.item()
             if isinstance(val, (int, float, complex)):
+                # If it's a float that is exactly an integer, treat it as an int for symbolic math
+                if isinstance(val, float) and val.is_integer():
+                    return sp.sympify(int(val))
                 return sp.sympify(val)
             return sp.Symbol(str(val))
         return sp.Matrix([[_to_sympy(x) for x in row] for row in arr])
     if isinstance(expr, str):
         return sp.sympify(expr)
+    
+    # Check if expr itself is an integer-valued float
+    if isinstance(expr, float) and expr.is_integer():
+        return sp.sympify(int(expr))
+        
     return expr
 
 def km_syms(*args):
@@ -35,6 +43,12 @@ def km_syms(*args):
     return tuple(symbols)
 
 def km_diff(expr, var=None, n=1):
+    # Route purely numeric inputs to numerical diff
+    if isinstance(expr, KheraMATArray):
+        if expr._array.dtype != object:
+            from .core_math import km_diff as num_diff
+            return num_diff(expr, n if var is None else var)
+            
     sp_expr = _to_sympy(expr)
     _n = int(n._array.item()) if isinstance(n, KheraMATArray) else int(n)
     if var is None:
@@ -79,6 +93,10 @@ def km_factor(expr):
     sp_expr = _to_sympy(expr)
     return sp.factor(sp_expr)
 
+def km_char(expr):
+    from .symbolic import clean_sym_str
+    return clean_sym_str(expr)
+
 SYMBOLIC_FUNCTIONS: Dict[str, Callable] = {
     "syms": km_syms,
     "diff": km_diff,
@@ -87,4 +105,5 @@ SYMBOLIC_FUNCTIONS: Dict[str, Callable] = {
     "simplify": km_simplify,
     "expand": km_expand,
     "factor": km_factor,
+    "char": km_char,
 }

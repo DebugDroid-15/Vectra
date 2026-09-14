@@ -145,6 +145,8 @@ class Interpreter:
         return node.value
 
     def visit_IdentifierNode(self, node: IdentifierNode) -> Any:
+        if node.name == "who":
+            return KheraMATArray(np.array(list(self.workspace.variables.keys()), dtype=object))
         if self.workspace.has(node.name):
             return self.workspace.get(node.name)
         if node.name in self.functions:
@@ -195,6 +197,13 @@ class Interpreter:
             kma = _ensure_kma(val)
             if kma is not None:
                 return kma.transpose() if node.op == "'" else kma.dot_transpose()
+        elif node.op == '~':
+            import sympy as sp
+            if isinstance(val, sp.Basic):
+                return sp.Not(val)
+            if isinstance(val, KheraMATArray):
+                return KheraMATArray(~val._array.astype(bool))
+            return not bool(val)
         raise InterpreterError(f"Unsupported unary operator '{node.op}'")
 
     def visit_BinaryOpNode(self, node: BinaryOpNode) -> Any:
@@ -227,6 +236,9 @@ class Interpreter:
 
         import sympy as sp
         if isinstance(left, sp.Basic) or isinstance(right, sp.Basic):
+            if isinstance(left, float) and left.is_integer(): left = int(left)
+            if isinstance(right, float) and right.is_integer(): right = int(right)
+            
             if node.op == '==': return sp.Eq(left, right)
             elif node.op == '~=': return sp.Ne(left, right)
 
@@ -276,15 +288,23 @@ class Interpreter:
                     return f"\n{target_name} =\n\n{target_arr}\n"
         elif isinstance(node.target, MatrixNode):
             # Multiple output assignment: [a, b] = expr or [~, b] = expr
-            targets = []  # list of (name_or_None) — None means discard (~)
+            targets = []
             for row in node.target.rows:
                 for item in row:
                     if isinstance(item, IdentifierNode):
                         targets.append(item.name)
                     elif isinstance(item, UnaryOpNode) and item.op == '~':
-                        targets.append(None)  # tilde discard
+                        targets.append(None)
                     else:
-                        targets.append(None)  # treat unknown targets as discard
+                        targets.append(None)
+                        
+            old_nargout = getattr(self, 'nargout', 1)
+            self.nargout = len(targets)
+            try:
+                val = self.visit(node.value)
+            finally:
+                self.nargout = old_nargout
+                
             if isinstance(val, (tuple, list)):
                 out_str = []
                 for name, v in zip(targets, val):
@@ -484,8 +504,15 @@ class Interpreter:
 
             # Then check registered functions (treat indexing as function call)
             if func_name in self.functions:
+                import inspect
                 func = self.functions[func_name]
-                return func(*idx_vals)
+                sig = inspect.signature(func)
+                nargout = getattr(self, 'nargout', 1)
+                if 'nargout' in sig.parameters:
+                    res = func(*idx_vals, nargout=nargout)
+                else:
+                    res = func(*idx_vals)
+                return res
 
             # Dynamic NumPy fallback
             if hasattr(np, func_name):

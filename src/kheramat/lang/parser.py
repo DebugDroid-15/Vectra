@@ -19,6 +19,7 @@ class Parser:
     def __init__(self, tokens: List[Token]):
         self.tokens = tokens
         self.pos = 0
+        self.in_matrix_row = False
 
     def _peek(self, offset: int = 0) -> Token:
         idx = self.pos + offset
@@ -269,7 +270,17 @@ class Parser:
     def parse_additive(self) -> ASTNode:
         left = self.parse_multiplicative()
         while self._peek().type in (TokenType.PLUS, TokenType.MINUS):
-            op_tok = self._advance()
+            op_tok = self._peek()
+            next_tok = self._peek(1)
+            
+            # MATLAB matrix literal spacing semantics:
+            # [1 -6] -> 1, -6 (op has space before, but no space after -> unary)
+            # [1 - 6] -> -5 (op has space before and after -> binary)
+            # [1-6] -> -5 (op has no space before or after -> binary)
+            if self.in_matrix_row and op_tok.ws_before and not next_tok.ws_before:
+                break
+                
+            self._advance()
             right = self.parse_multiplicative()
             left = BinaryOpNode(left, op_tok.value, right)
         return left
@@ -369,7 +380,10 @@ class Parser:
                 elem = IdentifierNode("~")
                 current_row.append(elem)
             else:
+                old_in_matrix = self.in_matrix_row
+                self.in_matrix_row = True
                 elem = self.parse_expression()
+                self.in_matrix_row = old_in_matrix
                 current_row.append(elem)
 
             self._match(TokenType.COMMA)

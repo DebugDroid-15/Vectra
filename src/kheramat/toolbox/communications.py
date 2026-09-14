@@ -8,25 +8,30 @@ def _to_arr(val: Any) -> np.ndarray:
         return val._array
     return np.array(val)
 
-def km_ammod(x, fc, fs, k_a=1.0) -> KheraMATArray:
+def km_ammod(x, fc, fs, ini_phase=0.0, carramp=0.0) -> KheraMATArray:
     m = _to_arr(x).flatten()
     _fc = float(_to_arr(fc).item())
     _fs = float(_to_arr(fs).item())
-    _ka = float(_to_arr(k_a).item())
+    _phase = float(_to_arr(ini_phase).item() if hasattr(ini_phase, "_array") else ini_phase)
+    _carramp = float(_to_arr(carramp).item() if hasattr(carramp, "_array") else carramp)
     t = np.arange(len(m)) / _fs
-    carrier = np.cos(2 * np.pi * _fc * t)
-    s = (1.0 + _ka * m) * carrier
+    carrier = np.cos(2 * np.pi * _fc * t + _phase)
+    s = (m + _carramp) * carrier
     return KheraMATArray(s.reshape((1, -1)))
 
-def km_amdemod(y, fc, fs) -> KheraMATArray:
+def km_amdemod(y, fc, fs, ini_phase=0.0, carramp=0.0) -> KheraMATArray:
     s = _to_arr(y).flatten()
     _fc = float(_to_arr(fc).item())
     _fs = float(_to_arr(fs).item())
+    _phase = float(_to_arr(ini_phase).item() if hasattr(ini_phase, "_array") else ini_phase)
+    _carramp = float(_to_arr(carramp).item() if hasattr(carramp, "_array") else carramp)
     t = np.arange(len(s)) / _fs
-    carrier = np.cos(2 * np.pi * _fc * t)
+    carrier = np.cos(2 * np.pi * _fc * t + _phase)
     demod = s * carrier * 2.0
     b, a = signal.butter(5, _fc / (_fs / 2.0))
-    m_hat = signal.lfilter(b, a, demod)
+    # Use filtfilt to avoid phase shift ruining the RMS error comparison
+    m_hat = signal.filtfilt(b, a, demod)
+    m_hat = m_hat - _carramp
     return KheraMATArray(m_hat.reshape((1, -1)))
 
 def km_fmmod(x, fc, fs, freqdev=1.0) -> KheraMATArray:
