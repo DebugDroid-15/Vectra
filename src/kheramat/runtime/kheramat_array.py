@@ -58,12 +58,12 @@ class KheraMATArray:
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
             if isinstance(r, KheraMATArray):
-                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
+                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.size == 1 and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
             else:
                 r_idx = slice(None) if r == ":" else int(r) - 1
 
             if isinstance(c, KheraMATArray):
-                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
+                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.size == 1 and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
             else:
                 c_idx = slice(None) if c == ":" else int(c) - 1
 
@@ -95,12 +95,12 @@ class KheraMATArray:
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
             if isinstance(r, KheraMATArray):
-                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
+                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.size == 1 and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
             else:
                 r_idx = slice(None) if r == ":" else int(r) - 1
 
             if isinstance(c, KheraMATArray):
-                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
+                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.size == 1 and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
             else:
                 c_idx = slice(None) if c == ":" else int(c) - 1
 
