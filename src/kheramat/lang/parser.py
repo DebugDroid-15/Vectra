@@ -346,7 +346,7 @@ class Parser:
 
     def parse_multiplicative(self) -> ASTNode:
         left = self.parse_power()
-        while self._peek().type in (TokenType.MUL, TokenType.DOT_MUL, TokenType.DIV, TokenType.DOT_DIV):
+        while self._peek().type in (TokenType.MUL, TokenType.DOT_MUL, TokenType.DIV, TokenType.DOT_DIV, TokenType.BACKSLASH, TokenType.DOT_BACKSLASH):
             op_tok = self._advance()
             right = self.parse_power()
             left = BinaryOpNode(left, op_tok.value, right)

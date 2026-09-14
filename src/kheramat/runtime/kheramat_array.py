@@ -153,6 +153,26 @@ class KheraMATArray:
         b = other._array if isinstance(other, KheraMATArray) else other
         return KheraMATArray(self._array / b)
 
+    def matldiv(self, other: Any) -> 'KheraMATArray':
+        """Matrix left division (\\ in MATLAB: A \\ B = inv(A) * B or least-squares)"""
+        b = other._array if isinstance(other, KheraMATArray) else np.array(other)
+        if self._array.size == 1:
+            return KheraMATArray(b / self._array)
+        if b.size == 1:
+            return KheraMATArray(np.linalg.pinv(self._array) * b)
+        if self._array.ndim == 2 and b.ndim in (1, 2) and self._array.shape[0] == self._array.shape[1]:
+            try:
+                return KheraMATArray(np.linalg.solve(self._array, b))
+            except np.linalg.LinAlgError:
+                return KheraMATArray(np.linalg.lstsq(self._array, b, rcond=None)[0])
+        else:
+            return KheraMATArray(np.linalg.lstsq(self._array, b, rcond=None)[0])
+
+    def dot_ldiv(self, other: Any) -> 'KheraMATArray':
+        """Elementwise left division (.\\ in MATLAB: A .\\ B = B ./ A)"""
+        b = other._array if isinstance(other, KheraMATArray) else other
+        return KheraMATArray(b / self._array)
+
     def matpow(self, other: Any) -> 'KheraMATArray':
         """Matrix power (^ in MATLAB)"""
         p = int(other._array if isinstance(other, KheraMATArray) else other)

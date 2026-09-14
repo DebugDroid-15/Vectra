@@ -104,23 +104,40 @@ class Lexer:
             if ch == '"' or (ch == "'" and not self._is_transpose_context()):
                 quote_char = self._advance()
                 string_val = ""
-                while self._peek() != quote_char and self._peek() != '\0':
-                    if self._peek() == '\\':
+                while True:
+                    cur = self._peek()
+                    if cur == '\0':
+                        raise LexerError("Unterminated string literal", start_line, start_col)
+                    if cur == quote_char:
+                        # In MATLAB, 'it''s' escapes the quote by doubling it
+                        if self._peek(1) == quote_char:
+                            self._advance()
+                            self._advance()
+                            string_val += quote_char
+                            continue
+                        else:
+                            self._advance()
+                            break
+                    elif cur == '\\':
                         self._advance()
-                        nxt = self._advance()
+                        nxt = self._peek()
+                        if nxt == '\0':
+                            string_val += '\\'
+                            break
+                        self._advance()
                         if nxt == 'n': string_val += '\n'
                         elif nxt == 't': string_val += '\t'
+                        elif nxt == 'r': string_val += '\r'
+                        elif nxt == 'b': string_val += '\b'
+                        elif nxt == 'f': string_val += '\f'
+                        elif nxt == '0': string_val += '\0'
                         elif nxt in ('\\', '\'', '"'): string_val += nxt
                         else: string_val += '\\' + nxt
                     else:
                         string_val += self._advance()
 
-                if self._peek() == quote_char:
-                    self._advance()
-                    self.tokens.append(Token(TokenType.STRING, string_val, start_line, start_col, ws_before=ws_before))
-                    continue
-                else:
-                    raise LexerError("Unterminated string literal", start_line, start_col)
+                self.tokens.append(Token(TokenType.STRING, string_val, start_line, start_col, ws_before=ws_before))
+                continue
 
             # Line continuation: ...
             if ch == '.' and self._peek(1) == '.' and self._peek(2) == '.':
@@ -143,6 +160,10 @@ class Lexer:
                 elif nxt == '/':
                     self._advance(); self._advance()
                     self.tokens.append(Token(TokenType.DOT_DIV, "./", start_line, start_col, ws_before=ws_before))
+                    continue
+                elif nxt == '\\':
+                    self._advance(); self._advance()
+                    self.tokens.append(Token(TokenType.DOT_BACKSLASH, ".\\", start_line, start_col, ws_before=ws_before))
                     continue
                 elif nxt == '^':
                     self._advance(); self._advance()
@@ -196,6 +217,7 @@ class Lexer:
                 '-': TokenType.MINUS,
                 '*': TokenType.MUL,
                 '/': TokenType.DIV,
+                '\\': TokenType.BACKSLASH,
                 '^': TokenType.POW,
                 '=': TokenType.ASSIGN,
                 '<': TokenType.LT,

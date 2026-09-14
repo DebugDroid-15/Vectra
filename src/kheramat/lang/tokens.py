@@ -14,6 +14,8 @@ class TokenType(Enum):
     DOT_MUL = auto()        # .*
     DIV = auto()            # /
     DOT_DIV = auto()        # ./
+    BACKSLASH = auto()      # \
+    DOT_BACKSLASH = auto()  # .\
     POW = auto()            # ^
     DOT_POW = auto()        # .^
     TRANSPOSE = auto()      # '

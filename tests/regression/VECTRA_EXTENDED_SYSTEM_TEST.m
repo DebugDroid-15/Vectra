@@ -103,6 +103,11 @@ assert(sum(sum(abs(A * V_eig - V_eig * D_eig))) < tol, 'Eig reconstruction faile
 e_vals = eig(A);
 assert(abs(sum(e_vals) - trace(A)) < tol, 'Eig sum vs trace failed');
 
+% Matrix left division (A \ b)
+b_vec = [1; 2; 3];
+x_sol = A \ b_vec;
+assert(sum(abs(A * x_sol - b_vec)) < tol, 'Matrix left division A \\ b failed');
+
 %% ================================================================
 % 6. STATISTICS & SCALAR REDUCTIONS
 %% ================================================================

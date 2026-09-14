@@ -212,6 +212,8 @@ class Interpreter:
             elif node.op == '.*': return left.dot_mul(right)
             elif node.op == '/': return left.matdiv(right)
             elif node.op == './': return left.dot_div(right)
+            elif node.op == '\\': return left.matldiv(right)
+            elif node.op == '.\\': return left.dot_ldiv(right)
             elif node.op == '^': return left.matpow(right)
             elif node.op == '.^': return left.dot_pow(right)
             elif node.op == '==': return left == right
@@ -241,6 +243,7 @@ class Interpreter:
         elif node.op == '-': return left - right
         elif node.op in ('*', '.*'): return left * right
         elif node.op in ('/', './'): return left / right
+        elif node.op in ('\\', '.\\'): return right / left
         elif node.op in ('^', '.^'): return left ** right
         elif node.op == '==': return left == right
         elif node.op == '~=': return left != right
