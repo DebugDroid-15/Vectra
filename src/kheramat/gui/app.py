@@ -6,7 +6,6 @@ try:
     from ..logger import setup_logging, install_crash_handler, get_logger
     install_crash_handler()
     logger = get_logger("gui.app")
-    logger.info("Initializing Vectra GUI application...")
 except Exception:
     pass
 

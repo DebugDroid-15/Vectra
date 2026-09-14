@@ -6,7 +6,7 @@ This document details the level of language, array semantic, and toolbox conform
 - **FULL**: Identical behavior and output semantics.
 - **PARTIAL**: Substantial functionality supported; subset of flags or options implemented.
 - **DIFFERENT**: Intentionally specialized open-source implementation.
-- **MISSING**: Not currently present in Vectra 1.0.0.
+- **MISSING**: Not currently present in Vectra 0.1.0.
 
 ---
 

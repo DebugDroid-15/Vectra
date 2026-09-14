@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vectra"
-version = "1.0.0"
-description = "Vectra — Extensible open-source MATLAB alternative for scientific computing and ECE engineering."
+version = "0.1.0"
+description = "Vectra — Scientific Computing & Engineering Desktop Environment"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

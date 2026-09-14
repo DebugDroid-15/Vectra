@@ -2,7 +2,7 @@
 
 **Product**: VECTRA  
 **Tagline**: Compute. Simulate. Innovate.  
-**Version**: 1.0.0 (Production Hardened Baseline)  
+**Version**: 0.1.0 (Initial Public Alpha)  
 **Status Date**: 2026-09-14  
 
 ---

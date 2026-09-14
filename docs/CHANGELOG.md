@@ -2,7 +2,7 @@
 
 All notable changes to Vectra will be documented in this file.
 
-## [1.0.0] - 2026-09-13
+## [0.1.0] - 2026-09-14 — Initial Public Alpha
 
 ### Added
 - Phase 1 Baseline Documentation (`PRODUCT_STATUS.md`, `ARCHITECTURE.md`, `COMPATIBILITY.md`, etc.).

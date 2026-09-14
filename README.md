@@ -18,7 +18,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
 [![PySide6](https://img.shields.io/badge/GUI-PySide6-41CD52.svg)](https://qt.io)
-[![Build Status](https://img.shields.io/badge/Tests-38%20Passed-success.svg)](tests/)
+[![Build Status](https://img.shields.io/badge/Tests-42%20Passed-success.svg)](tests/)
 
 ---
 
@@ -217,17 +217,21 @@ pytest tests/
 
 ```text
 ============================= test session starts =============================
-collected 38 items
+collected 42 items
 
 tests/test_cli.py ..                                                    [ 5%]
 tests/test_diagnostics.py .                                             [ 7%]
 tests/test_indexing.py .                                                [10%]
-tests/test_interpreter.py ........                                      [31%]
-tests/test_projects.py .                                               [34%]
-tests/test_toolboxes.py ..................                             [81%]
-tests/test_user_functions.py ......                                    [100%]
+tests/test_interpreter.py ........                                      [28%]
+tests/test_lexer.py ....                                                [38%]
+tests/test_parser.py ....                                               [47%]
+tests/test_projects.py .                                               [50%]
+tests/test_runtime.py ...                                               [57%]
+tests/test_toolboxes.py ..................                             [90%]
+tests/test_universal_matrix_commands.py ..                             [95%]
+tests/test_user_functions.py ..                                       [100%]
 
-============================== 38 passed in 6.50s ==============================
+============================== 42 passed in 6.50s ==============================
 ```
 
 ---
