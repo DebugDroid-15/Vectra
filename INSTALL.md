@@ -1,96 +1,118 @@
-# VECTRA — Installation & User Execution Guide
+# VECTRA — INSTALLATION & SETUP GUIDE
 
-Welcome to **Vectra**, an independent, open-source scientific computing and engineering desktop environment. This guide provides step-by-step instructions for installing, configuring, running, and troubleshooting Vectra across Windows, Linux, and macOS platforms.
+```
+  ___ ___ ____________ ________ _________    _____   
+ /   |   \\______   \\_____  \\______   \  /  _  \  
+/    ~    \|    |  _/ /   |   \|    |  _/ /  /_\  \ 
+\    Y    /|    |   \/    |    \    |   \/    |    \
+ \___|_  / |______  /\_______  /______  /\____|__  /
+       \/         \/         \/       \/         \/ 
+```
 
----
-
-## 🚀 1. One-Click Quick Start (Windows)
-
-For Windows users, Vectra includes a zero-configuration automated launcher script (`Vectra.bat`) that scans system dependencies, initializes an isolated virtual environment, installs graphical and scientific libraries with live progress feedback, and launches the desktop environment.
-
-### Steps:
-1. **Download / Clone Repository**:
-   ```cmd
-   git clone https://github.com/DebugDroid-15/Vectra.git
-   cd Vectra
-   ```
-2. **Double-Click or Run `Vectra.bat`**:
-   ```cmd
-   Vectra.bat
-   ```
-
-### What `Vectra.bat` Does Automatically:
-* 🔍 **System Scan**: Automatically detects standard Python installations (`py` launcher, system `PATH`, LocalAppData, Program Files, Conda/Anaconda).
-* ⚙️ **Directory Inspection**: Verifies write permissions and checks local workspace paths.
-* 📊 **Progress & ETA Display**: Shows a live progress percentage bar with an estimated time remaining (ETA) countdown so you know installation is actively proceeding.
-* 📦 **Virtual Environment (.venv)**: Initializes an isolated Python environment to avoid polluting global or system packages.
-* 🛠️ **Dependency Binding**: Installs PySide6, NumPy, Matplotlib, SciPy, SymPy, and registers Vectra in editable mode.
-* 🖥️ **GUI Launch**: Runs `python -m kheramat.gui.app` directly.
+**Official Attribution:**  
+*Made by Amar Khera / Under Protocol Industry Software Solutions*  
+*License: MIT*
 
 ---
 
-## 🐧 2. Linux & macOS Installation Guide
+## 📋 Prerequisites
 
-### Prerequisites:
-* **Python**: Python 3.10 or newer.
+To run **Vectra**, your system must satisfy:
+- **Operating System**: Windows 10/11, macOS (10.15+), or Linux (Ubuntu 20.04+, Debian, Fedora, Arch).
+- **Python**: Python 3.10, 3.11, or 3.12 installed on your machine.
+- **Git**: Installed and accessible via command line.
 
-### Steps:
+---
+
+## ⚡ Option 1: Automatic 1-Click Launch (Windows)
+
+If you are on Windows, you do **not** need to manually configure virtual environments or install Python packages. The included automated launcher script (`Vectra.bat`) will set everything up for you automatically.
+
 1. **Clone the Repository**:
-   ```bash
+   ```cmd
    git clone https://github.com/DebugDroid-15/Vectra.git
    cd Vectra
    ```
 
-2. **Create & Activate Virtual Environment**:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+2. **Run `Vectra.bat`**:
+   Double-click `Vectra.bat` in Windows Explorer or execute it from PowerShell/CMD:
+   ```cmd
+   .\Vectra.bat
    ```
 
-3. **Install Dependencies & Package**:
-   ```bash
-   pip install --upgrade pip
-   pip install -e .
-   ```
-
-4. **Launch Desktop Application**:
-   ```bash
-   python3 -m kheramat.gui.app
-   ```
+`Vectra.bat` automatically:
+- Checks for an available Python installation (`python`).
+- Initializes a local isolated virtual environment (`.venv`).
+- Installs all engineering dependencies (`PySide6`, `NumPy`, `SciPy`, `SymPy`, `Matplotlib`).
+- Launches the complete **Vectra Desktop Application**.
 
 ---
 
-## 💻 3. Running Headless (Command Line / Server Execution)
+## 🛠️ Option 2: Manual Installation (Windows, Linux, macOS)
 
-Vectra includes a standalone CLI utility (`vectra-cli`) for running computations without launching the graphical desktop interface:
+If you prefer installing Vectra into a custom environment or are using Linux/macOS:
 
-### Evaluate Expression Headlessly:
+### Step 1: Clone the Repository
 ```bash
-vectra-cli --eval "A = [1 2; 3 4]; B = A * 2; disp(B);"
+git clone https://github.com/DebugDroid-15/Vectra.git
+cd Vectra
 ```
 
-### Run Script File Headlessly:
+### Step 2: Create & Activate Virtual Environment
 ```bash
-vectra-cli --run path/to/script.m
+# On Linux / macOS:
+python3 -m venv .venv
+source .venv/bin/activate
+
+# On Windows (PowerShell):
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### Step 3: Install Required Dependencies
+```bash
+pip install -e .
+```
+*(Or install core dependencies manually: `pip install PySide6 numpy scipy sympy matplotlib pytest`)*
+
+### Step 4: Launch Vectra
+
+- **GUI Mode (Desktop App)**:
+  ```bash
+  python -m kheramat.gui.app
+  ```
+
+- **Headless Command Line REPL**:
+  ```bash
+  python -m kheramat.cli
+  ```
+
+- **Run Script File directly**:
+  ```bash
+  python -m kheramat.cli --run tests/regression/VECTRA_EXTENDED_SYSTEM_TEST.m
+  ```
+
+---
+
+## 🧪 Option 3: Running the Full Test & Verification Suite
+
+To verify that all mathematical engine toolboxes, DSP functions, linear algebra solvers, symbolic differentiators, and GUI controls are 100% operational on your machine:
+
+```bash
+python -m pytest tests
+```
+
+Expected output:
+```
+40 passed in 6.97s
 ```
 
 ---
 
-## 🔧 4. Troubleshooting & FAQ
+## ❓ Troubleshooting & Support
 
-### Issue: "No compatible Python installation was found"
-* **Cause**: Python is either not installed or was not added to your system `PATH`.
-* **Fix**:
-  1. Download Python 3.10+ from [python.org](https://www.python.org/downloads/).
-  2. During installation, **ensure you check the box**: `"Add python.exe to PATH"`.
-  3. Re-run `Vectra.bat`.
-
-### Issue: "DLL load failed while importing QtWidgets" (Conda / Anaconda Users)
-* **Cause**: PATH conflicts between Anaconda Qt binaries and PySide6.
-* **Fix**: `Vectra.bat` handles this automatically by setting isolated DLL search paths. If running manually in Anaconda prompt, ensure you run inside an isolated `.venv`.
-
-### Log File Location:
-If Vectra crashes unexpectedly, full diagnostic traces are automatically logged to:
-* **Windows**: `%USERPROFILE%\.vectra\logs\vectra_app.log`
-* **Linux/macOS**: `~/.vectra/logs/vectra_app.log`
-
+| Issue | Cause | Resolution |
+| :--- | :--- | :--- |
+| `python: command not found` | Python is not added to System PATH | Install Python 3.11 from [python.org](https://www.python.org/) and check *"Add Python to PATH"* during installation. |
+| `qt.qpa.plugin: Could not load the Qt platform plugin "xcb"` *(Linux)* | Missing X11/xcb libraries | Run `sudo apt install libxcb-cursor0 libxcb-xinerama0 libxcb-icccm4` on Debian/Ubuntu systems. |
+| `ImportError: PySide6` | Virtual environment not activated | Ensure `.venv` is activated (`source .venv/bin/activate` or `.\.venv\Scripts\activate`) before running. |
