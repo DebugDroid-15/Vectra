@@ -352,6 +352,14 @@ class Interpreter:
                 val = self.workspace.get(func_name)
                 if isinstance(val, KheraMATArray):
                     return val.get_index(*idx_vals)
+                elif isinstance(val, (int, float, complex, np.number, np.ndarray)):
+                    return KheraMATArray(val).get_index(*idx_vals)
+                elif isinstance(val, (list, tuple)):
+                    if len(idx_vals) == 1:
+                        idx = idx_vals[0]
+                        py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
+                        elem = val[py_idx]
+                        return KheraMATArray(elem) if isinstance(elem, (int, float, complex, np.number, np.ndarray)) else elem
             if func_name in self.functions:
                 func = self.functions[func_name]
                 return func(*idx_vals)
@@ -369,7 +377,6 @@ class Interpreter:
         elif isinstance(target, (int, float, complex, np.number, np.ndarray)):
             return KheraMATArray(target).get_index(*idx_vals)
         elif isinstance(target, (list, tuple)):
-            # Unpack indexed element from list or tuple
             if len(idx_vals) == 1:
                 idx = idx_vals[0]
                 py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
