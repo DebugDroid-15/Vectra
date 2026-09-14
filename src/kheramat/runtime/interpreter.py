@@ -184,7 +184,7 @@ class Interpreter:
         return KheraMATArray(arr.reshape((1, -1)))
 
     def visit_UnaryOpNode(self, node: UnaryOpNode) -> Any:
-        val = _unwrap(self.visit(node.operand))
+        val = self.visit(node.operand)
         if node.op == '-':
             return -val
         elif node.op == '+':
@@ -247,14 +247,12 @@ class Interpreter:
         import sympy as sp
         from ..toolbox.symbolic import clean_sym_str
         if isinstance(node.target, IdentifierNode):
-            val = _unwrap(val)
             name = node.target.name
             self.workspace.set(name, val)
             if not node.suppress_output:
                 formatted_val = clean_sym_str(val) if isinstance(val, sp.Basic) else str(val)
                 return f"\n{name} =\n\n{formatted_val}\n"
         elif isinstance(node.target, (IndexingNode, CallNode)):
-            val = _unwrap(val)
             if isinstance(node.target, IndexingNode):
                 target_name = node.target.target.name if isinstance(node.target.target, IdentifierNode) else None
                 raw_indices = node.target.indices
@@ -282,10 +280,9 @@ class Interpreter:
             for row in node.target.rows:
                 for item in row:
                     if isinstance(item, IdentifierNode):
-                        if item.name == '~':
-                            targets.append(None)  # tilde discard
-                        else:
-                            targets.append(item.name)
+                        targets.append(item.name)
+                    elif isinstance(item, UnaryOpNode) and item.op == '~':
+                        targets.append(None)  # tilde discard
                     else:
                         targets.append(None)  # treat unknown targets as discard
             if isinstance(val, (tuple, list)):
@@ -315,6 +312,8 @@ class Interpreter:
             return obj[node.member]
         raise InterpreterError(f"Object {obj} has no member '{node.member}'")
 
+    def visit_CallNode(self, node: CallNode) -> Any:
+        args = [self.visit(arg) for arg in node.args]
 
     def visit_BreakNode(self, node: BreakNode):
         raise BreakSignal()
@@ -365,7 +364,7 @@ class Interpreter:
                 created.append(sym_obj)
             return created[0] if len(created) == 1 else tuple(created)
 
-        args = [_unwrap(self.visit(arg)) for arg in node.args]
+        args = [self.visit(arg) for arg in node.args]
 
         if self.workspace.has(node.func_name):
             val = self.workspace.get(node.func_name)
@@ -463,7 +462,7 @@ class Interpreter:
             raise InterpreterError(f"Cannot index object of type '{type(target).__name__}'.")
 
     def visit_IndexingNode(self, node: IndexingNode) -> Any:
-        idx_vals = [_unwrap(self.visit(i)) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
+        idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
 
         if isinstance(node.target, IdentifierNode):
             func_name = node.target.name
@@ -527,7 +526,7 @@ class Interpreter:
         return self._resolve_indexing(target, idx_vals)
 
     def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> Optional[str]:
-        val = _unwrap(self.visit(node.expr))
+        val = self.visit(node.expr)
         if val is not None and not node.suppress_output:
             self.workspace.set("ans", val)
             import sympy as sp
