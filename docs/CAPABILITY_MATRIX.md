@@ -13,3 +13,4 @@
 | **Controls** | LTI Systems (`tf`, `ss`, `step`, `impulse`, `bode`, `pole`) | FULL | SciPy Signal / LTI | Passed (100%) |
 | **Graphics** | 2D/3D Plotting (`surf`, `mesh`, `contour`, `subplot`, `legend`) | FULL | Matplotlib Engine | Passed (100%) |
 | **GUI** | PySide6 Desktop Environment & Debugger | FULL | PySide6 | Passed (100%) |
+
