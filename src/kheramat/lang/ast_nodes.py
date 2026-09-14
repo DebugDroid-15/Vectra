@@ -156,3 +156,42 @@ class FunctionDefNode(ASTNode):
     def __repr__(self):
         return f"FunctionDefNode(name={self.name}, params={self.params}, returns={self.returns})"
 
+
+class TryNode(ASTNode):
+    def __init__(self, body: BlockNode, catch_body: Optional[BlockNode] = None):
+        self.body = body
+        self.catch_body = catch_body
+
+    def __repr__(self):
+        return f"TryNode()"
+
+class CaseNode(ASTNode):
+    def __init__(self, condition: ASTNode, body: BlockNode):
+        self.condition = condition
+        self.body = body
+        
+    def __repr__(self):
+        return f"CaseNode(cond={self.condition})"
+
+class SwitchNode(ASTNode):
+    def __init__(self, condition: ASTNode, cases: List[CaseNode], otherwise_body: Optional[BlockNode] = None):
+        self.condition = condition
+        self.cases = cases
+        self.otherwise_body = otherwise_body
+
+    def __repr__(self):
+        return f"SwitchNode(cond={self.condition})"
+
+class GlobalNode(ASTNode):
+    def __init__(self, variables: List[str]):
+        self.variables = variables
+
+    def __repr__(self):
+        return f"GlobalNode({self.variables})"
+
+class PersistentNode(ASTNode):
+    def __init__(self, variables: List[str]):
+        self.variables = variables
+
+    def __repr__(self):
+        return f"PersistentNode({self.variables})"

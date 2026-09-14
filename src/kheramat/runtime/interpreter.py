@@ -1,11 +1,6 @@
 from typing import Any, Dict, List, Optional
 import numpy as np
-from ..lang.ast_nodes import (
-    ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode,
-    UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode,
-    ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode,
-    BreakNode, ContinueNode, ReturnNode, FunctionDefNode
-)
+from ..lang.ast_nodes import (TryNode, SwitchNode, CaseNode, GlobalNode, PersistentNode, ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode, UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode, ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode, BreakNode, ContinueNode, ReturnNode, FunctionDefNode)
 from ..lang.lexer import Lexer
 from ..lang.parser import Parser
 from .kheramat_array import KheraMATArray
@@ -562,6 +557,26 @@ class Interpreter:
             return f"\nans =\n\n{formatted_val}\n"
         return None
 
+
+    def visit_TryNode(self, node: TryNode) -> Any:
+        try:
+            self.visit(node.body)
+        except Exception as e:
+            # Optionally populate lasterr/lastwarn in workspace here
+            if node.catch_body:
+                self.visit(node.catch_body)
+        return None
+
+    def visit_SwitchNode(self, node: SwitchNode) -> Any:
+        switch_val = self.visit(node.condition)
+        for case in node.cases:
+            case_val = self.visit(case.condition)
+            if switch_val == case_val:
+                self.visit(case.body)
+                return None
+        if node.otherwise_body:
+            self.visit(node.otherwise_body)
+        return None
     def visit_IfNode(self, node: IfNode) -> Optional[str]:
         cond_val = self.visit(node.condition)
         is_true = bool(np.all(cond_val._array)) if isinstance(cond_val, KheraMATArray) else bool(cond_val)

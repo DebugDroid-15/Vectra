@@ -1,11 +1,6 @@
 from typing import List, Optional
 from .tokens import Token, TokenType
-from .ast_nodes import (
-    ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode,
-    UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode,
-    ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode,
-    BreakNode, ContinueNode, ReturnNode, FunctionDefNode
-)
+from .ast_nodes import (TryNode, SwitchNode, CaseNode, GlobalNode, PersistentNode, ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode, UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode, ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode, BreakNode, ContinueNode, ReturnNode, FunctionDefNode)
 
 class ParserError(Exception):
     def __init__(self, message: str, token: Optional[Token] = None):
@@ -80,6 +75,11 @@ class Parser:
             self._advance()
             self._match_statement_terminator()
             return ReturnNode()
+
+        if tok.type == TokenType.TRY:
+            return self.parse_try_statement()
+        if tok.type == TokenType.SWITCH:
+            return self.parse_switch_statement()
         if tok.type == TokenType.FUNCTION:
             return self.parse_function_definition()
 
@@ -117,6 +117,65 @@ class Parser:
                 suppress = True
         return suppress
 
+
+    def parse_try_statement(self) -> ASTNode:
+        self._advance()
+        try_stmts = []
+        catch_stmts = []
+        in_catch = False
+        while self._peek().type not in (TokenType.END, TokenType.EOF):
+            if self._match(TokenType.NEWLINE, TokenType.SEMICOLON):
+                continue
+            if self._match(TokenType.CATCH):
+                in_catch = True
+                continue
+            stmt = self.parse_statement()
+            if stmt:
+                if in_catch: catch_stmts.append(stmt)
+                else: try_stmts.append(stmt)
+        self._expect(TokenType.END, "Expected 'end' at termination of try block")
+        catch_block = BlockNode(catch_stmts) if catch_stmts else None
+        return TryNode(BlockNode(try_stmts), catch_block)
+
+    def parse_switch_statement(self) -> ASTNode:
+        self._advance()
+        condition = self.parse_expression()
+        cases = []
+        otherwise_stmts = []
+        in_otherwise = False
+        
+        current_case_cond = None
+        current_case_stmts = []
+        
+        while self._peek().type not in (TokenType.END, TokenType.EOF):
+            if self._match(TokenType.NEWLINE, TokenType.SEMICOLON):
+                continue
+            if self._peek().type == TokenType.CASE:
+                if current_case_cond is not None:
+                    cases.append(CaseNode(current_case_cond, BlockNode(current_case_stmts)))
+                self._advance()
+                current_case_cond = self.parse_expression()
+                current_case_stmts = []
+                continue
+            elif self._match(TokenType.OTHERWISE):
+                if current_case_cond is not None:
+                    cases.append(CaseNode(current_case_cond, BlockNode(current_case_stmts)))
+                    current_case_cond = None
+                    current_case_stmts = []
+                in_otherwise = True
+                continue
+                
+            stmt = self.parse_statement()
+            if stmt:
+                if in_otherwise: otherwise_stmts.append(stmt)
+                elif current_case_cond is not None: current_case_stmts.append(stmt)
+                
+        if current_case_cond is not None:
+            cases.append(CaseNode(current_case_cond, BlockNode(current_case_stmts)))
+            
+        self._expect(TokenType.END, "Expected 'end' at termination of switch block")
+        otherwise_block = BlockNode(otherwise_stmts) if otherwise_stmts else None
+        return SwitchNode(condition, cases, otherwise_block)
     def parse_if_statement(self) -> IfNode:
         self._expect(TokenType.IF)
         condition = self.parse_expression()

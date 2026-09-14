@@ -55,6 +55,13 @@ class TokenType(Enum):
     RETURN = auto()
     BREAK = auto()
     CONTINUE = auto()
+    TRY = auto()
+    CATCH = auto()
+    SWITCH = auto()
+    CASE = auto()
+    OTHERWISE = auto()
+    GLOBAL = auto()
+    PERSISTENT = auto()
 
     EOF = auto()
 
@@ -69,6 +76,13 @@ KEYWORDS = {
     "return": TokenType.RETURN,
     "break": TokenType.BREAK,
     "continue": TokenType.CONTINUE,
+    "try": TokenType.TRY,
+    "catch": TokenType.CATCH,
+    "switch": TokenType.SWITCH,
+    "case": TokenType.CASE,
+    "otherwise": TokenType.OTHERWISE,
+    "global": TokenType.GLOBAL,
+    "persistent": TokenType.PERSISTENT,
 }
 
 class Token:
