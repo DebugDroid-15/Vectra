@@ -58,16 +58,25 @@ class KheraMATArray:
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
             if isinstance(r, KheraMATArray):
-                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.astype(int) - 1))
+                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
             else:
                 r_idx = slice(None) if r == ":" else int(r) - 1
 
             if isinstance(c, KheraMATArray):
-                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.astype(int) - 1))
+                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
             else:
                 c_idx = slice(None) if c == ":" else int(c) - 1
 
-            return KheraMATArray(self._array[r_idx, c_idx])
+            if isinstance(r_idx, np.ndarray) and isinstance(c_idx, np.ndarray):
+                res = self._array[np.ix_(r_idx, c_idx)]
+            elif isinstance(r_idx, np.ndarray) and not isinstance(r_idx, slice):
+                res = self._array[r_idx[:, None], c_idx]
+            elif isinstance(c_idx, np.ndarray) and not isinstance(c_idx, slice):
+                res = self._array[r_idx, c_idx]
+            else:
+                res = self._array[r_idx, c_idx]
+
+            return KheraMATArray(res)
         else:
             raise IndexError("Only 1D and 2D indexing currently supported.")
 
@@ -85,9 +94,22 @@ class KheraMATArray:
             self._array.flat[py_idx] = val_arr
         elif len(indices) == 2:
             r, c = indices[0], indices[1]
-            r_idx = slice(None) if r == ":" else ((r._array.astype(int) - 1) if isinstance(r, KheraMATArray) else int(r) - 1)
-            c_idx = slice(None) if c == ":" else ((c._array.astype(int) - 1) if isinstance(c, KheraMATArray) else int(c) - 1)
-            self._array[r_idx, c_idx] = val_arr
+            if isinstance(r, KheraMATArray):
+                r_idx = slice(None) if (isinstance(r._array, np.ndarray) and r._array.dtype.kind in ('U','S') and r._array.item() == ":") else (int(r._array.item()) - 1 if r._array.size == 1 else (r._array.flatten().astype(int) - 1))
+            else:
+                r_idx = slice(None) if r == ":" else int(r) - 1
+
+            if isinstance(c, KheraMATArray):
+                c_idx = slice(None) if (isinstance(c._array, np.ndarray) and c._array.dtype.kind in ('U','S') and c._array.item() == ":") else (int(c._array.item()) - 1 if c._array.size == 1 else (c._array.flatten().astype(int) - 1))
+            else:
+                c_idx = slice(None) if c == ":" else int(c) - 1
+
+            if isinstance(r_idx, np.ndarray) and isinstance(c_idx, np.ndarray):
+                self._array[np.ix_(r_idx, c_idx)] = val_arr
+            elif isinstance(r_idx, np.ndarray) and not isinstance(r_idx, slice):
+                self._array[r_idx[:, None], c_idx] = val_arr
+            else:
+                self._array[r_idx, c_idx] = val_arr
 
     # Matrix vs Elementwise arithmetic
     def __add__(self, other):
