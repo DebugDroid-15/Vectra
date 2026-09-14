@@ -231,6 +231,18 @@ class MainWindow(QMainWindow):
         self._apply_theme()
         self.statusBar().showMessage("Vectra Ready.")
 
+    def _create_menus(self):
+        from PySide6.QtGui import QAction
+        menubar = self.menuBar()
+        help_menu = menubar.addMenu("Help")
+        about_action = QAction("About Vectra", self)
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+
+    def show_about(self):
+        from PySide6.QtWidgets import QMessageBox
+        QMessageBox.about(self, "About Vectra", "<h3>Vectra</h3><p>Version 0.1.0<br/>Compute. Simulate. Innovate.</p><p>Made by Amar Khera<br/>Under Protocol Industry Software Solutions</p><p>MIT License</p>")
+
     def _toggle_theme(self):
         self.is_dark_mode = not self.is_dark_mode
         self.theme_act.setText("☀️ Light Theme" if self.is_dark_mode else "🌙 Dark Theme")
