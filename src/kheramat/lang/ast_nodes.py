@@ -17,6 +17,11 @@ class StringNode(ASTNode):
     def __repr__(self):
         return f"StringNode({self.value!r})"
 
+
+class EndNode(ASTNode):
+    def __repr__(self):
+        return 'EndNode()'
+
 class IdentifierNode(ASTNode):
     def __init__(self, name: str):
         self.name = name

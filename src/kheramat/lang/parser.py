@@ -1,6 +1,6 @@
 from typing import List, Optional
 from .tokens import Token, TokenType
-from .ast_nodes import (TryNode, SwitchNode, CaseNode, GlobalNode, PersistentNode, ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode, UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode, ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode, BreakNode, ContinueNode, ReturnNode, FunctionDefNode)
+from .ast_nodes import (TryNode, SwitchNode, CaseNode, GlobalNode, PersistentNode, ASTNode, NumberNode, StringNode, IdentifierNode, MatrixNode, ColonRangeNode, UnaryOpNode, BinaryOpNode, IndexingNode, MemberAccessNode, AssignmentNode, CallNode, ExpressionStatementNode, BlockNode, IfNode, ForNode, WhileNode, BreakNode, ContinueNode, ReturnNode, FunctionDefNode, EndNode)
 
 class ParserError(Exception):
     def __init__(self, message: str, token: Optional[Token] = None):
@@ -418,6 +418,10 @@ class Parser:
 
         if tok.type == TokenType.LBRACKET:
             return self.parse_matrix_literal()
+
+        if tok.type == TokenType.END:
+            self._advance()
+            return EndNode()
 
         raise ParserError("Unexpected expression token", tok)
 

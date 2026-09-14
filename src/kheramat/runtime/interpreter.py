@@ -136,6 +136,11 @@ class Interpreter:
     def visit_NumberNode(self, node: NumberNode) -> KheraMATArray:
         return KheraMATArray(node.value)
 
+    def visit_EndNode(self, node: Any) -> KheraMATArray:
+        if not hasattr(self, 'current_end_val') or self.current_end_val is None:
+            raise InterpreterError("Illegal use of 'end'.")
+        return KheraMATArray(self.current_end_val)
+
     def visit_StringNode(self, node: StringNode) -> str:
         return node.value
 
@@ -480,7 +485,46 @@ class Interpreter:
             raise InterpreterError(f"Cannot index object of type '{type(target).__name__}'.")
 
     def visit_IndexingNode(self, node: IndexingNode) -> Any:
-        idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
+        # Resolve target to determine shape for 'end'
+        val = None
+        is_array = False
+        if isinstance(node.target, IdentifierNode):
+            func_name = node.target.name
+            if self.workspace.has(func_name):
+                val = self.workspace.get(func_name)
+                is_array = True
+        else:
+            val = self.visit(node.target)
+            is_array = True
+            
+        shape = (1,)
+        if is_array:
+            if isinstance(val, KheraMATArray):
+                shape = val._array.shape
+            elif isinstance(val, np.ndarray):
+                shape = val.shape
+            elif isinstance(val, (list, tuple)):
+                shape = (len(val),)
+
+        idx_vals = []
+        num_indices = len(node.indices)
+        num_dims = len(shape)
+        
+        for i, idx_node in enumerate(node.indices):
+            if num_indices == 1:
+                end_val = np.prod(shape) if shape else 1
+            else:
+                end_val = shape[i] if i < num_dims else 1
+            
+            old_end = getattr(self, 'current_end_val', None)
+            self.current_end_val = end_val
+            
+            if isinstance(idx_node, StringNode) and idx_node.value == ":":
+                idx_vals.append(":")
+            else:
+                idx_vals.append(self.visit(idx_node))
+                
+            self.current_end_val = old_end
 
         if isinstance(node.target, IdentifierNode):
             func_name = node.target.name
