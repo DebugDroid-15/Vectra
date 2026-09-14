@@ -359,7 +359,101 @@ class PlotManager:
         self.current_axes = None
         self._refresh()
 
+
+    def hold(self, flag="on"):
+        flag_str = str(flag._array.item() if hasattr(flag, "_array") else flag).lower()
+        if flag_str == "on":
+            self.hold_on = True
+        elif flag_str == "off":
+            self.hold_on = False
+
+    def legend(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        labels = [str(a._array.item() if hasattr(a, "_array") and a._array.size == 1 else a) for a in args]
+        ax.legend(labels)
+        self._refresh()
+
+    def plot3(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        import matplotlib.pyplot as plt
+        if not hasattr(ax, 'plot3D'):
+            fig = ax.figure
+            fig.delaxes(ax)
+            ax = fig.add_subplot(111, projection='3d')
+            self.current_axes = ax
+        x = args[0]._array if hasattr(args[0], '_array') else args[0]
+        y = args[1]._array if hasattr(args[1], '_array') else args[1]
+        z = args[2]._array if hasattr(args[2], '_array') else args[2]
+        ax.plot3D(x.flatten(), y.flatten(), z.flatten())
+        self._refresh()
+
+    def contour3(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        import matplotlib.pyplot as plt
+        if not hasattr(ax, 'plot3D'):
+            fig = ax.figure
+            fig.delaxes(ax)
+            ax = fig.add_subplot(111, projection='3d')
+            self.current_axes = ax
+        x = args[0]._array if hasattr(args[0], '_array') else args[0]
+        y = args[1]._array if hasattr(args[1], '_array') else args[1]
+        z = args[2]._array if hasattr(args[2], '_array') else args[2]
+        levels = 10 if len(args) < 4 else int(args[3]._array.item() if hasattr(args[3], '_array') else args[3])
+        ax.contour3D(x, y, z, levels)
+        self._refresh()
+        
+    def colorbar(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        if len(ax.collections) > 0:
+            ax.figure.colorbar(ax.collections[0], ax=ax)
+        self._refresh()
+
+    def axis(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        if args:
+            arg = str(args[0]._array.item() if hasattr(args[0], '_array') else args[0])
+            ax.axis(arg)
+        self._refresh()
+
+    def view(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        if len(args) == 2 and hasattr(ax, 'view_init'):
+            az = float(args[0]._array.item() if hasattr(args[0], '_array') else args[0])
+            el = float(args[1]._array.item() if hasattr(args[1], '_array') else args[1])
+            ax.view_init(elev=el, azim=az)
+        self._refresh()
+
+    def shading(self, *args) -> None:
+        pass
+
+    def polarplot(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        fig = ax.figure
+        fig.delaxes(ax)
+        ax = fig.add_subplot(111, polar=True)
+        self.current_axes = ax
+        x = args[0]._array if hasattr(args[0], '_array') else args[0]
+        y = args[1]._array if hasattr(args[1], '_array') else args[1]
+        ax.plot(x.flatten(), y.flatten())
+        self._refresh()
+
+    def histogram(self, *args) -> None:
+        ax = self.get_axes()
+        if not ax: return
+        x = args[0]._array if hasattr(args[0], '_array') else args[0]
+        bins = 10 if len(args) < 2 else int(args[1]._array.item() if hasattr(args[1], '_array') else args[1])
+        ax.hist(x.flatten(), bins=bins)
+        self._refresh()
+
 def km_plot(*args): PlotManager.get_instance().plot(*args)
+
 def km_scatter(x, y, *args): PlotManager.get_instance().scatter(x, y, *args)
 def km_bar(x, y): PlotManager.get_instance().bar(x, y)
 def km_stem(*args): PlotManager.get_instance().stem(*args)
@@ -375,7 +469,18 @@ def km_xlim(*args): PlotManager.get_instance().xlim(*args)
 def km_ylim(*args): PlotManager.get_instance().ylim(*args)
 def km_text(*args): PlotManager.get_instance().text(*args)
 def km_gtext(*args): PlotManager.get_instance().gtext(*args)
+
+def km_legend(*args): PlotManager.get_instance().legend(*args)
+def km_plot3(*args): PlotManager.get_instance().plot3(*args)
+def km_contour3(*args): PlotManager.get_instance().contour3(*args)
+def km_colorbar(*args): PlotManager.get_instance().colorbar(*args)
+def km_axis(*args): PlotManager.get_instance().axis(*args)
+def km_view(*args): PlotManager.get_instance().view(*args)
+def km_shading(*args): PlotManager.get_instance().shading(*args)
+def km_polarplot(*args): PlotManager.get_instance().polarplot(*args)
+def km_histogram(*args): PlotManager.get_instance().histogram(*args)
 def km_hold(flag="on"): PlotManager.get_instance().hold(flag)
+
 def km_surf(X, Y=None, Z=None): PlotManager.get_instance().surf(X, Y, Z)
 def km_mesh(X, Y=None, Z=None): PlotManager.get_instance().mesh(X, Y, Z)
 def km_quiver(X, Y, U, V): PlotManager.get_instance().quiver(X, Y, U, V)
@@ -391,6 +496,16 @@ PLOTTING_FUNCTIONS: Dict[str, Callable] = {
     "ylabel": km_ylabel,
     "zlabel": km_zlabel,
     "title": km_title,
+    "legend": km_legend,
+    "plot3": km_plot3,
+    "contour3": km_contour3,
+    "colorbar": km_colorbar,
+    "axis": km_axis,
+    "view": km_view,
+    "shading": km_shading,
+    "polarplot": km_polarplot,
+    "histogram": km_histogram,
+    "hold": km_hold,
     "grid": km_grid,
     "figure": km_figure,
     "close": km_close,

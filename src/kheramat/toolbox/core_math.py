@@ -48,6 +48,10 @@ def km_randn(*args) -> KheraMATArray:
     shape = _parse_dims(*args)
     return KheraMATArray(np.random.randn(*shape))
 
+def km_rng(seed) -> None:
+    s = int(_to_arr(seed).item() if isinstance(seed, KheraMATArray) else seed)
+    np.random.seed(s)
+
 def km_linspace(start, stop, num=100) -> KheraMATArray:
     st = float(_to_arr(start).item() if isinstance(start, KheraMATArray) else start)
     sp = float(_to_arr(stop).item() if isinstance(stop, KheraMATArray) else stop)
@@ -143,8 +147,25 @@ def km_min(*args, nargout=1) -> Any:
         return KheraMATArray(val)
     elif len(args) == 2:
         return KheraMATArray(np.minimum(_to_arr(args[0]), _to_arr(args[1])))
+    elif len(args) == 3:
+        a = _to_arr(args[0])
+        dim = args[2]
+        dim_val = dim._array.item() if hasattr(dim, '_array') else dim
+        if dim_val == 'all':
+            val = np.min(a)
+            if nargout > 1:
+                idx = np.argmin(a) + 1
+                return KheraMATArray(val), KheraMATArray(idx)
+            return KheraMATArray(val)
+        else:
+            ax = int(dim_val) - 1
+            val = np.min(a, axis=ax, keepdims=True)
+            if nargout > 1:
+                idx = np.argmin(a, axis=ax, keepdims=True) + 1
+                return KheraMATArray(val), KheraMATArray(idx)
+            return KheraMATArray(val)
     else:
-        raise ValueError("min takes 1 or 2 arguments in Vectra")
+        raise ValueError("min takes 1, 2, or 3 arguments in Vectra")
 
 def km_max(*args, nargout=1) -> Any:
     if len(args) == 1:
@@ -157,8 +178,25 @@ def km_max(*args, nargout=1) -> Any:
         return KheraMATArray(val)
     elif len(args) == 2:
         return KheraMATArray(np.maximum(_to_arr(args[0]), _to_arr(args[1])))
+    elif len(args) == 3:
+        a = _to_arr(args[0])
+        dim = args[2]
+        dim_val = dim._array.item() if hasattr(dim, '_array') else dim
+        if dim_val == 'all':
+            val = np.max(a)
+            if nargout > 1:
+                idx = np.argmax(a) + 1
+                return KheraMATArray(val), KheraMATArray(idx)
+            return KheraMATArray(val)
+        else:
+            ax = int(dim_val) - 1
+            val = np.max(a, axis=ax, keepdims=True)
+            if nargout > 1:
+                idx = np.argmax(a, axis=ax, keepdims=True) + 1
+                return KheraMATArray(val), KheraMATArray(idx)
+            return KheraMATArray(val)
     else:
-        raise ValueError("max takes 1 or 2 arguments in Vectra")
+        raise ValueError("max takes 1, 2, or 3 arguments in Vectra")
 
 def _format_matlab(fmt: str, *args) -> str:
     fmt_str = str(fmt._array.item() if hasattr(fmt, "_array") else fmt)
@@ -496,6 +534,7 @@ CORE_MATH_FUNCTIONS: Dict[str, Callable] = {
     "eye": km_eye,
     "rand": km_rand,
     "randn": km_randn,
+    "rng": km_rng,
     "linspace": km_linspace,
     "logspace": km_logspace,
     "diag": km_diag,
