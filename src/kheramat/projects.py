@@ -11,7 +11,7 @@ class VectraProject:
         self.name = name
         self.root_path = os.path.abspath(root_path)
         self.entry_script = entry_script
-        self.version = "1.0.0"
+        self.version = "0.1.0"
         self.config_file = os.path.join(self.root_path, "project.vectra")
 
     def save(self):
@@ -20,7 +20,7 @@ class VectraProject:
             "name": self.name,
             "version": self.version,
             "entry_script": self.entry_script,
-            "created_by": "Vectra Desktop 1.0.0"
+            "created_by": "Vectra Desktop 0.1.0"
         }
         with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
@@ -33,6 +33,6 @@ class VectraProject:
             data = json.load(f)
         root = os.path.dirname(config_path)
         proj = cls(data.get("name", "Untitled"), root, data.get("entry_script", "main.m"))
-        proj.version = data.get("version", "1.0.0")
+        proj.version = data.get("version", "0.1.0")
         return proj
 

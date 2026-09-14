@@ -14,7 +14,7 @@ def run_cli(args: Optional[List[str]] = None) -> int:
     logger = get_logger("cli")
 
     parser = argparse.ArgumentParser(description="Vectra Scientific Computing Platform CLI")
-    parser.add_argument("--version", action="version", version="Vectra 1.0.0")
+    parser.add_argument("--version", action="version", version="Vectra 0.1.0")
     parser.add_argument("--run", type=str, help="Execute a Vectra script (.m) in headless mode and exit.")
     parser.add_argument("--eval", type=str, help="Evaluate a Vectra command string and exit.")
     parser.add_argument("--no-gui", action="store_true", help="Force headless non-graphical execution.")
@@ -49,7 +49,7 @@ def run_cli(args: Optional[List[str]] = None) -> int:
             return 1
 
     # Interactive REPL mode in CLI
-    print("Vectra Scientific Computing CLI REPL (v1.0.0)")
+    print("Vectra Scientific Computing CLI REPL (v0.1.0)")
     print("Type 'exit' or 'quit' to exit.\n")
     while True:
         try:

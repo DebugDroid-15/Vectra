@@ -59,7 +59,7 @@ class CommandWindow(QWidget):
         self.display = QTextEdit()
         self.display.setReadOnly(True)
         self.display.setFont(QFont("Consolas", 10))
-        self.display.setText("Vectra Desktop Environment (v1.0.0)\nType MATLAB commands or run scripts.\n\n")
+        self.display.setText("Vectra Desktop Environment (v0.1.0)\nType MATLAB commands or run scripts.\n\n")
 
         self.input_line = CommandLineEdit()
         self.input_line.setFont(QFont("Consolas", 10))
@@ -180,6 +180,8 @@ class MainWindow(QMainWindow):
         dock_plot.setWidget(plot_container)
         dock_plot.setObjectName("DockPlot")
         self.addDockWidget(Qt.RightDockWidgetArea, dock_plot)
+
+        self._create_menus()
 
         # 4. Right Bottom: Workspace Inspector
         self.workspace_panel = WorkspacePanel(self.interpreter)

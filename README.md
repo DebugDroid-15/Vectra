@@ -245,7 +245,12 @@ Contributions are welcome! Please follow these guidelines:
 
 <div align="center">
 
-**Vectra — Compute. Simulate. Innovate.**  
-Licensed under the [MIT License](LICENSE).
+**VECTRA**  
+**Compute. Simulate. Innovate.**
+
+**Made by Amar Khera**  
+**Under Protocol Industry Software Solutions**
+
+**Open Source — MIT License**
 
 </div>
