@@ -31,6 +31,29 @@ class ReturnSignal(Exception):
     def __init__(self, value: Any = None):
         self.value = value
 
+
+def _ensure_kma(val: Any) -> KheraMATArray:
+    """Convert any reasonable value to KheraMATArray. Returns None if impossible."""
+    if isinstance(val, KheraMATArray):
+        return val
+    if isinstance(val, np.ndarray):
+        return KheraMATArray(val)
+    if isinstance(val, (int, float, complex, np.integer, np.floating, np.complexfloating)):
+        return KheraMATArray(val)
+    if isinstance(val, bool):
+        return KheraMATArray(int(val))
+    return None
+
+
+def _to_scalar(val: Any) -> Any:
+    """Extract a Python scalar from KheraMATArray or return as-is."""
+    if isinstance(val, KheraMATArray):
+        if val._array.size == 1:
+            return val._array.item()
+        return val._array
+    return val
+
+
 class Interpreter:
     def __init__(self, workspace: Optional[Workspace] = None):
         self.workspace = workspace or Workspace()
@@ -134,15 +157,18 @@ class Interpreter:
         return KheraMATArray(np.array(evaluated_rows))
 
     def visit_ColonRangeNode(self, node: ColonRangeNode) -> KheraMATArray:
-        start_val = float(self.visit(node.start)._array.item())
-        stop_val = float(self.visit(node.stop)._array.item())
+        start_raw = self.visit(node.start)
+        stop_raw = self.visit(node.stop)
+        start_val = float(_to_scalar(start_raw))
+        stop_val = float(_to_scalar(stop_raw))
 
         if node.step is not None:
-            step_val = float(self.visit(node.step)._array.item())
+            step_raw = self.visit(node.step)
+            step_val = float(_to_scalar(step_raw))
         else:
             step_val = 1.0
 
-        arr = np.arange(start_val, stop_val + step_val/2.0, step_val)
+        arr = np.arange(start_val, stop_val + step_val / 2.0, step_val)
         return KheraMATArray(arr.reshape((1, -1)))
 
     def visit_UnaryOpNode(self, node: UnaryOpNode) -> Any:
@@ -154,6 +180,9 @@ class Interpreter:
         elif node.op in ("'", ".'"):
             if isinstance(val, KheraMATArray):
                 return val.transpose() if node.op == "'" else val.dot_transpose()
+            kma = _ensure_kma(val)
+            if kma is not None:
+                return kma.transpose() if node.op == "'" else kma.dot_transpose()
         raise InterpreterError(f"Unsupported unary operator '{node.op}'")
 
     def visit_BinaryOpNode(self, node: BinaryOpNode) -> Any:
@@ -221,6 +250,12 @@ class Interpreter:
                 raw_indices = node.target.args
                 target_arr = self.workspace.get(target_name)
 
+            # Ensure target_arr is a KheraMATArray for set_index
+            if not isinstance(target_arr, KheraMATArray):
+                kma = _ensure_kma(target_arr)
+                if kma is not None:
+                    target_arr = kma
+
             idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in raw_indices]
             target_arr.set_index(val, *idx_vals)
             if target_name:
@@ -236,9 +271,9 @@ class Interpreter:
                         targets.append(item.name)
                     else:
                         raise InterpreterError("Invalid target in multi-variable assignment.")
-            if isinstance(val, tuple):
+            if isinstance(val, (tuple, list)):
                 out_str = []
-                # Map available returned outputs to target variables
+                # Map available returned outputs to target variables (zip truncates to shorter)
                 for name, v in zip(targets, val):
                     self.workspace.set(name, v)
                     if not node.suppress_output:
@@ -258,9 +293,6 @@ class Interpreter:
         elif isinstance(obj, dict) and node.member in obj:
             return obj[node.member]
         raise InterpreterError(f"Object {obj} has no member '{node.member}'")
-
-    def visit_CallNode(self, node: CallNode) -> Any:
-        args = [self.visit(arg) for arg in node.args]
 
     def visit_BreakNode(self, node: BreakNode):
         raise BreakSignal()
@@ -344,25 +376,87 @@ class Interpreter:
 
         raise InterpreterError(f"Undefined function or variable '{node.func_name}'.")
 
+    def _resolve_indexing(self, target: Any, idx_vals: List[Any]) -> Any:
+        """Universal indexing resolution. Handles KheraMATArray, scalars, np.ndarray,
+        tuples, lists, sympy objects, strings, booleans, and None robustly."""
+        # 1. KheraMATArray — standard path
+        if isinstance(target, KheraMATArray):
+            return target.get_index(*idx_vals)
+
+        # 2. Raw numpy array — wrap and index
+        if isinstance(target, np.ndarray):
+            return KheraMATArray(target).get_index(*idx_vals)
+
+        # 3. Numeric scalars — wrap and index
+        if isinstance(target, (int, float, complex, np.integer, np.floating, np.complexfloating)):
+            return KheraMATArray(target).get_index(*idx_vals)
+
+        # 4. Boolean — wrap as number
+        if isinstance(target, bool):
+            return KheraMATArray(int(target))
+
+        # 5. Tuple or list — extract by position (1-based)
+        if isinstance(target, (tuple, list)):
+            if len(idx_vals) == 1:
+                idx = idx_vals[0]
+                py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
+                elem = target[py_idx]
+                kma = _ensure_kma(elem)
+                return kma if kma is not None else elem
+            # Multiple indices on a tuple: try wrapping each
+            results = []
+            for idx in idx_vals:
+                py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
+                results.append(target[py_idx])
+            return tuple(results)
+
+        # 6. String — MATLAB string indexing
+        if isinstance(target, str):
+            if len(idx_vals) == 1:
+                idx = idx_vals[0]
+                if isinstance(idx, KheraMATArray):
+                    indices = (idx._array.flatten().astype(int) - 1).tolist()
+                    return ''.join(target[i] for i in indices)
+                py_idx = int(idx) - 1
+                return target[py_idx]
+
+        # 7. Sympy expression — treat indexing as function call
+        import sympy as sp
+        if isinstance(sp.Basic, type) and isinstance(target, sp.Basic):
+            # Sympy expressions can't be indexed; return as-is
+            return target
+
+        # 8. None — something upstream returned nothing
+        if target is None:
+            raise InterpreterError("Cannot index a null/empty result.")
+
+        # 9. Callable — treat indexing as function call
+        if callable(target):
+            return target(*idx_vals)
+
+        # Fallback: try wrapping in KheraMATArray
+        try:
+            return KheraMATArray(target).get_index(*idx_vals)
+        except Exception:
+            raise InterpreterError(f"Cannot index object of type '{type(target).__name__}'.")
+
     def visit_IndexingNode(self, node: IndexingNode) -> Any:
         idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
+
         if isinstance(node.target, IdentifierNode):
             func_name = node.target.name
+
+            # Check workspace first
             if self.workspace.has(func_name):
                 val = self.workspace.get(func_name)
-                if isinstance(val, KheraMATArray):
-                    return val.get_index(*idx_vals)
-                elif isinstance(val, (int, float, complex, np.number, np.ndarray)):
-                    return KheraMATArray(val).get_index(*idx_vals)
-                elif isinstance(val, (list, tuple)):
-                    if len(idx_vals) == 1:
-                        idx = idx_vals[0]
-                        py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
-                        elem = val[py_idx]
-                        return KheraMATArray(elem) if isinstance(elem, (int, float, complex, np.number, np.ndarray)) else elem
+                return self._resolve_indexing(val, idx_vals)
+
+            # Then check registered functions (treat indexing as function call)
             if func_name in self.functions:
                 func = self.functions[func_name]
                 return func(*idx_vals)
+
+            # Dynamic NumPy fallback
             if hasattr(np, func_name):
                 raw_args = [a._array if isinstance(a, KheraMATArray) else a for a in idx_vals]
                 res = getattr(np, func_name)(*raw_args)
@@ -371,18 +465,23 @@ class Interpreter:
                 elif isinstance(res, (int, float, complex, np.number)):
                     return KheraMATArray(res)
                 return res
+
+            # Dynamic SciPy fallback
+            import scipy.linalg as la
+            if hasattr(la, func_name):
+                raw_args = [a._array if isinstance(a, KheraMATArray) else a for a in idx_vals]
+                res = getattr(la, func_name)(*raw_args)
+                if isinstance(res, np.ndarray):
+                    return KheraMATArray(res)
+                elif isinstance(res, (int, float, complex, np.number)):
+                    return KheraMATArray(res)
+                return res
+
+            raise InterpreterError(f"Undefined function or variable '{func_name}'.")
+
+        # Non-identifier target (e.g. chained indexing, function call result)
         target = self.visit(node.target)
-        if isinstance(target, KheraMATArray):
-            return target.get_index(*idx_vals)
-        elif isinstance(target, (int, float, complex, np.number, np.ndarray)):
-            return KheraMATArray(target).get_index(*idx_vals)
-        elif isinstance(target, (list, tuple)):
-            if len(idx_vals) == 1:
-                idx = idx_vals[0]
-                py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
-                elem = target[py_idx]
-                return KheraMATArray(elem) if isinstance(elem, (int, float, complex, np.number, np.ndarray)) else elem
-        raise InterpreterError("Indexing standard non-array object is invalid.")
+        return self._resolve_indexing(target, idx_vals)
 
     def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> Optional[str]:
         val = self.visit(node.expr)
