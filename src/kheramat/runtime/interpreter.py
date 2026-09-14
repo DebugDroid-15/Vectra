@@ -244,11 +244,6 @@ class Interpreter:
                     if not node.suppress_output:
                         out_str.append(f"\n{name} =\n\n{v}\n")
                 return "".join(out_str) if out_str else None
-            elif len(targets) == 1:
-                self.workspace.set(targets[0], val)
-                if not node.suppress_output:
-                    return f"\n{targets[0]} =\n\n{val}\n"
-                return None
             else:
                 self.workspace.set(targets[0], val)
                 if not node.suppress_output:
