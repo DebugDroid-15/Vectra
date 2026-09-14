@@ -157,17 +157,21 @@ class Interpreter:
         return KheraMATArray(np.array(evaluated_rows))
 
     def visit_ColonRangeNode(self, node: ColonRangeNode) -> KheraMATArray:
+        start_val = float(self.visit(node.start)._array.item())
+        stop_val = float(self.visit(node.stop)._array.item())
         start_raw = self.visit(node.start)
         stop_raw = self.visit(node.stop)
         start_val = float(_to_scalar(start_raw))
         stop_val = float(_to_scalar(stop_raw))
 
         if node.step is not None:
+            step_val = float(self.visit(node.step)._array.item())
             step_raw = self.visit(node.step)
             step_val = float(_to_scalar(step_raw))
         else:
             step_val = 1.0
 
+        arr = np.arange(start_val, stop_val + step_val/2.0, step_val)
         arr = np.arange(start_val, stop_val + step_val / 2.0, step_val)
         return KheraMATArray(arr.reshape((1, -1)))
 
@@ -293,6 +297,9 @@ class Interpreter:
         elif isinstance(obj, dict) and node.member in obj:
             return obj[node.member]
         raise InterpreterError(f"Object {obj} has no member '{node.member}'")
+
+    def visit_CallNode(self, node: CallNode) -> Any:
+        args = [self.visit(arg) for arg in node.args]
 
     def visit_BreakNode(self, node: BreakNode):
         raise BreakSignal()
@@ -449,6 +456,16 @@ class Interpreter:
             # Check workspace first
             if self.workspace.has(func_name):
                 val = self.workspace.get(func_name)
+                if isinstance(val, KheraMATArray):
+                    return val.get_index(*idx_vals)
+                elif isinstance(val, (int, float, complex, np.number, np.ndarray)):
+                    return KheraMATArray(val).get_index(*idx_vals)
+                elif isinstance(val, (list, tuple)):
+                    if len(idx_vals) == 1:
+                        idx = idx_vals[0]
+                        py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
+                        elem = val[py_idx]
+                        return KheraMATArray(elem) if isinstance(elem, (int, float, complex, np.number, np.ndarray)) else elem
                 return self._resolve_indexing(val, idx_vals)
 
             # Then check registered functions (treat indexing as function call)
@@ -481,6 +498,17 @@ class Interpreter:
 
         # Non-identifier target (e.g. chained indexing, function call result)
         target = self.visit(node.target)
+        if isinstance(target, KheraMATArray):
+            return target.get_index(*idx_vals)
+        elif isinstance(target, (int, float, complex, np.number, np.ndarray)):
+            return KheraMATArray(target).get_index(*idx_vals)
+        elif isinstance(target, (list, tuple)):
+            if len(idx_vals) == 1:
+                idx = idx_vals[0]
+                py_idx = int(idx._array.item() if isinstance(idx, KheraMATArray) else idx) - 1
+                elem = target[py_idx]
+                return KheraMATArray(elem) if isinstance(elem, (int, float, complex, np.number, np.ndarray)) else elem
+        raise InterpreterError("Indexing standard non-array object is invalid.")
         return self._resolve_indexing(target, idx_vals)
 
     def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> Optional[str]:
@@ -532,3 +560,4 @@ class Interpreter:
             except ContinueSignal:
                 continue
         return "\n".join(logs) if logs else None
+
