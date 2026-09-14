@@ -228,7 +228,7 @@ class Interpreter:
                 if not node.suppress_output:
                     return f"\n{target_name} =\n\n{target_arr}\n"
         elif isinstance(node.target, MatrixNode):
-            # Multiple output assignment: [a, b, c] = expr
+            # Multiple output assignment: [a, b] = expr or [a, b, c] = expr
             targets = []
             for row in node.target.rows:
                 for item in row:
@@ -237,9 +237,8 @@ class Interpreter:
                     else:
                         raise InterpreterError("Invalid target in multi-variable assignment.")
             if isinstance(val, tuple):
-                if len(val) != len(targets):
-                    raise InterpreterError(f"Output argument mismatch: expected {len(targets)}, got {len(val)}.")
                 out_str = []
+                # Map available returned outputs to target variables
                 for name, v in zip(targets, val):
                     self.workspace.set(name, v)
                     if not node.suppress_output:
@@ -251,7 +250,10 @@ class Interpreter:
                     return f"\n{targets[0]} =\n\n{val}\n"
                 return None
             else:
-                raise InterpreterError(f"Output argument mismatch: function returned single value, expected {len(targets)}.")
+                self.workspace.set(targets[0], val)
+                if not node.suppress_output:
+                    return f"\n{targets[0]} =\n\n{val}\n"
+                return None
         return None
 
     def visit_MemberAccessNode(self, node: MemberAccessNode) -> Any:
