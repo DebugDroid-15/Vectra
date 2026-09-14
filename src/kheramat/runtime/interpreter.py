@@ -54,6 +54,14 @@ def _to_scalar(val: Any) -> Any:
     return val
 
 
+def _unwrap(val: Any) -> Any:
+    """If val is a tuple (from multi-output functions like max/min), return the first element.
+    This allows max(x), min(x) to work in single-value expression contexts."""
+    if isinstance(val, tuple) and len(val) > 0:
+        return val[0]
+    return val
+
+
 class Interpreter:
     def __init__(self, workspace: Optional[Workspace] = None):
         self.workspace = workspace or Workspace()
@@ -176,7 +184,7 @@ class Interpreter:
         return KheraMATArray(arr.reshape((1, -1)))
 
     def visit_UnaryOpNode(self, node: UnaryOpNode) -> Any:
-        val = self.visit(node.operand)
+        val = _unwrap(self.visit(node.operand))
         if node.op == '-':
             return -val
         elif node.op == '+':
@@ -190,8 +198,8 @@ class Interpreter:
         raise InterpreterError(f"Unsupported unary operator '{node.op}'")
 
     def visit_BinaryOpNode(self, node: BinaryOpNode) -> Any:
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = _unwrap(self.visit(node.left))
+        right = _unwrap(self.visit(node.right))
 
         if isinstance(left, KheraMATArray) and isinstance(right, KheraMATArray):
             if node.op == '+': return left + right
@@ -239,12 +247,14 @@ class Interpreter:
         import sympy as sp
         from ..toolbox.symbolic import clean_sym_str
         if isinstance(node.target, IdentifierNode):
+            val = _unwrap(val)
             name = node.target.name
             self.workspace.set(name, val)
             if not node.suppress_output:
                 formatted_val = clean_sym_str(val) if isinstance(val, sp.Basic) else str(val)
                 return f"\n{name} =\n\n{formatted_val}\n"
         elif isinstance(node.target, (IndexingNode, CallNode)):
+            val = _unwrap(val)
             if isinstance(node.target, IndexingNode):
                 target_name = node.target.target.name if isinstance(node.target.target, IdentifierNode) else None
                 raw_indices = node.target.indices
@@ -267,26 +277,33 @@ class Interpreter:
                 if not node.suppress_output:
                     return f"\n{target_name} =\n\n{target_arr}\n"
         elif isinstance(node.target, MatrixNode):
-            # Multiple output assignment: [a, b] = expr or [a, b, c] = expr
-            targets = []
+            # Multiple output assignment: [a, b] = expr or [~, b] = expr
+            targets = []  # list of (name_or_None) — None means discard (~)
             for row in node.target.rows:
                 for item in row:
                     if isinstance(item, IdentifierNode):
-                        targets.append(item.name)
+                        if item.name == '~':
+                            targets.append(None)  # tilde discard
+                        else:
+                            targets.append(item.name)
                     else:
-                        raise InterpreterError("Invalid target in multi-variable assignment.")
+                        targets.append(None)  # treat unknown targets as discard
             if isinstance(val, (tuple, list)):
                 out_str = []
-                # Map available returned outputs to target variables (zip truncates to shorter)
                 for name, v in zip(targets, val):
-                    self.workspace.set(name, v)
-                    if not node.suppress_output:
-                        out_str.append(f"\n{name} =\n\n{v}\n")
+                    if name is not None:
+                        self.workspace.set(name, v)
+                        if not node.suppress_output:
+                            out_str.append(f"\n{name} =\n\n{v}\n")
                 return "".join(out_str) if out_str else None
             else:
-                self.workspace.set(targets[0], val)
-                if not node.suppress_output:
-                    return f"\n{targets[0]} =\n\n{val}\n"
+                # Single value assigned to first non-discard target
+                for name in targets:
+                    if name is not None:
+                        self.workspace.set(name, val)
+                        if not node.suppress_output:
+                            return f"\n{name} =\n\n{val}\n"
+                        return None
                 return None
         return None
 
@@ -298,8 +315,6 @@ class Interpreter:
             return obj[node.member]
         raise InterpreterError(f"Object {obj} has no member '{node.member}'")
 
-    def visit_CallNode(self, node: CallNode) -> Any:
-        args = [self.visit(arg) for arg in node.args]
 
     def visit_BreakNode(self, node: BreakNode):
         raise BreakSignal()
@@ -350,7 +365,7 @@ class Interpreter:
                 created.append(sym_obj)
             return created[0] if len(created) == 1 else tuple(created)
 
-        args = [self.visit(arg) for arg in node.args]
+        args = [_unwrap(self.visit(arg)) for arg in node.args]
 
         if self.workspace.has(node.func_name):
             val = self.workspace.get(node.func_name)
@@ -448,7 +463,7 @@ class Interpreter:
             raise InterpreterError(f"Cannot index object of type '{type(target).__name__}'.")
 
     def visit_IndexingNode(self, node: IndexingNode) -> Any:
-        idx_vals = [self.visit(i) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
+        idx_vals = [_unwrap(self.visit(i)) if not (isinstance(i, StringNode) and i.value == ":") else ":" for i in node.indices]
 
         if isinstance(node.target, IdentifierNode):
             func_name = node.target.name
@@ -512,7 +527,7 @@ class Interpreter:
         return self._resolve_indexing(target, idx_vals)
 
     def visit_ExpressionStatementNode(self, node: ExpressionStatementNode) -> Optional[str]:
-        val = self.visit(node.expr)
+        val = _unwrap(self.visit(node.expr))
         if val is not None and not node.suppress_output:
             self.workspace.set("ans", val)
             import sympy as sp

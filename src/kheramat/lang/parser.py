@@ -363,8 +363,14 @@ class Parser:
                     current_row = []
                 continue
 
-            elem = self.parse_expression()
-            current_row.append(elem)
+            # Special case for discard placeholder [~, x] in assignment
+            if self._peek().type == TokenType.NOT and self._peek(1).type in (TokenType.COMMA, TokenType.RBRACKET, TokenType.SEMICOLON, TokenType.NEWLINE):
+                self._advance()
+                elem = IdentifierNode("~")
+                current_row.append(elem)
+            else:
+                elem = self.parse_expression()
+                current_row.append(elem)
 
             self._match(TokenType.COMMA)
 

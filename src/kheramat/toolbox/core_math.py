@@ -92,8 +92,15 @@ def km_ifft(arr) -> KheraMATArray: return KheraMATArray(np.fft.ifft(_to_arr(arr)
 # Reductions
 def km_sum(arr) -> KheraMATArray: return KheraMATArray(np.sum(_to_arr(arr)))
 def km_mean(arr) -> KheraMATArray: return KheraMATArray(np.mean(_to_arr(arr)))
-def km_min(arr) -> KheraMATArray: return KheraMATArray(np.min(_to_arr(arr)))
-def km_max(arr) -> KheraMATArray: return KheraMATArray(np.max(_to_arr(arr)))
+def km_min(arr) -> tuple:
+    a = _to_arr(arr).flatten()
+    idx = int(np.argmin(a))
+    return (KheraMATArray(a[idx]), KheraMATArray(idx + 1))
+
+def km_max(arr) -> tuple:
+    a = _to_arr(arr).flatten()
+    idx = int(np.argmax(a))
+    return (KheraMATArray(a[idx]), KheraMATArray(idx + 1))
 
 def _format_matlab(fmt: str, *args) -> str:
     fmt_str = str(fmt._array.item() if hasattr(fmt, "_array") else fmt)
