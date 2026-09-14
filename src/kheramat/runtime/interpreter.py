@@ -228,22 +228,30 @@ class Interpreter:
                 if not node.suppress_output:
                     return f"\n{target_name} =\n\n{target_arr}\n"
         elif isinstance(node.target, MatrixNode):
-            var_names = []
-            for r in node.target.rows:
-                for item in r:
+            # Multiple output assignment: [a, b, c] = expr
+            targets = []
+            for row in node.target.rows:
+                for item in row:
                     if isinstance(item, IdentifierNode):
-                        var_names.append(item.name)
-            if isinstance(val, (tuple, list)):
+                        targets.append(item.name)
+                    else:
+                        raise InterpreterError("Invalid target in multi-variable assignment.")
+            if isinstance(val, tuple):
+                if len(val) != len(targets):
+                    raise InterpreterError(f"Output argument mismatch: expected {len(targets)}, got {len(val)}.")
                 out_str = []
-                for name, v in zip(var_names, val):
+                for name, v in zip(targets, val):
                     self.workspace.set(name, v)
                     if not node.suppress_output:
                         out_str.append(f"\n{name} =\n\n{v}\n")
                 return "".join(out_str) if out_str else None
-            elif len(var_names) >= 1:
-                self.workspace.set(var_names[0], val)
+            elif len(targets) == 1:
+                self.workspace.set(targets[0], val)
                 if not node.suppress_output:
-                    return f"\n{var_names[0]} =\n\n{val}\n"
+                    return f"\n{targets[0]} =\n\n{val}\n"
+                return None
+            else:
+                raise InterpreterError(f"Output argument mismatch: function returned single value, expected {len(targets)}.")
         return None
 
     def visit_MemberAccessNode(self, node: MemberAccessNode) -> Any:
