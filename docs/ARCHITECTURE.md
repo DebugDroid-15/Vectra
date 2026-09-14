@@ -1,47 +1,30 @@
 # Vectra Architecture Specification
 
-## Overview
-
-Vectra enforces strict separation between the scientific computing runtime and the desktop user interface.
+## System Architecture
 
 ```
-                  VECTRA SOURCE / REPL
-                           │
-                           ▼
-                        Lexer
-                           │
-                           ▼
-                        Parser
-                           │
-                           ▼
-                          AST
-                           │
-                           ▼
-                        Runtime
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
-       Workspace       Toolboxes         Graphics
-          │                │                │
-          └────────────────┼────────────────┘
-                           ▼
-                 NumPy / SciPy / SymPy
-                           │
-                           ▼
-                       Results
-                           │
-                           ▼
-                 Application Services
-          (Execution, Workspace, Figures)
-                           │
-                           ▼
-                      PySide6 GUI
+[ MATLAB-Style Script (.m) / REPL Input ]
+                    │
+                    ▼
+          [ Lexer (lexer.py) ]
+                    │ Token Stream
+                    ▼
+         [ Parser (parser.py) ]
+                    │ AST Nodes
+                    ▼
+     [ Interpreter (interpreter.py) ] ◄──────► [ Scope / Workspace (workspace.py) ]
+                    │
+        ┌───────────┴───────────┐
+        ▼                       ▼
+[ KheraMATArray ]        [ Function Registry ]
+(Column-Major Array)     (Toolboxes)
+        │                       │
+        ▼                       ▼
+ [ NumPy Backend ]       [ Core Math / Plotting / Controls / Signal / Comms / Symbolic ]
 ```
 
-## Layer Definitions
+## Subsystem Isolation
 
-1. **Language Layer** (`src/kheramat/lang/`): Lexer, Token definitions, AST nodes, Parser. Converts raw MATLAB code strings into structured AST blocks.
-2. **Runtime Layer** (`src/kheramat/runtime/`): Interpreter visitor engine, `KheraMATArray` (1-based ndarray wrapper), `Workspace` variable scope.
-3. **Toolbox Layer** (`src/kheramat/toolbox/`): Core math, Signals, DSP, Communications, Electromagnetics, Control, and Symbolic functions wrapping NumPy/SciPy/SymPy.
-4. **GUI Layer** (`src/kheramat/gui/`): Desktop PySide6 user interface consuming application services.
-
+1. **Numerical Engine Isolation**: The interpreter (`interpreter.py`) and array implementation (`kheramat_array.py`) are strictly headlessly executable and maintain zero dependencies on PySide6 or any GUI widgets.
+2. **Graphics Context Isolation**: Plotting commands route through `plotting.py` using Matplotlib backend rendering without forcing synchronous GUI thread execution.
+3. **Workspace Isolation**: Scope variables are managed inside `Workspace` instances, supporting isolated function evaluation stack frames.

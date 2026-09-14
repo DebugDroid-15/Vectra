@@ -97,6 +97,41 @@ def km_char(expr):
     from .symbolic import clean_sym_str
     return clean_sym_str(expr)
 
+def km_taylor(expr, var=None, n=6):
+    sp_expr = _to_sympy(expr)
+    _n = int(n._array.item()) if isinstance(n, KheraMATArray) else int(n)
+    if var is None:
+        free_vars = list(sp_expr.free_symbols) if hasattr(sp_expr, "free_symbols") else []
+        sp_var = free_vars[0] if free_vars else sp.Symbol('x')
+    else:
+        sp_var = _to_sympy(var)
+    return sp.series(sp_expr, sp_var, n=_n).removeO()
+
+def km_subs(expr, old, new):
+    sp_expr = _to_sympy(expr)
+    sp_old = _to_sympy(old)
+    sp_new = _to_sympy(new)
+    res = sp_expr.subs(sp_old, sp_new)
+    if hasattr(res, 'is_number') and res.is_number:
+        try:
+            return KheraMATArray(float(res))
+        except Exception:
+            pass
+    return res
+
+def km_laplace(expr, t=None, s=None):
+    sp_expr = _to_sympy(expr)
+    sp_t = _to_sympy(t) if t else sp.Symbol('t')
+    sp_s = _to_sympy(s) if s else sp.Symbol('s')
+    L, _, _ = sp.laplace_transform(sp_expr, sp_t, sp_s)
+    return L
+
+def km_ilaplace(expr, s=None, t=None):
+    sp_expr = _to_sympy(expr)
+    sp_s = _to_sympy(s) if s else sp.Symbol('s')
+    sp_t = _to_sympy(t) if t else sp.Symbol('t')
+    return sp.inverse_laplace_transform(sp_expr, sp_s, sp_t)
+
 SYMBOLIC_FUNCTIONS: Dict[str, Callable] = {
     "syms": km_syms,
     "diff": km_diff,
@@ -106,4 +141,8 @@ SYMBOLIC_FUNCTIONS: Dict[str, Callable] = {
     "expand": km_expand,
     "factor": km_factor,
     "char": km_char,
+    "taylor": km_taylor,
+    "subs": km_subs,
+    "laplace": km_laplace,
+    "ilaplace": km_ilaplace,
 }

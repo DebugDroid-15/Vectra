@@ -92,6 +92,12 @@ def km_zero(sys_obj) -> KheraMATArray:
         return KheraMATArray(np.empty((0, 1)))
     return KheraMATArray(zeros.reshape((-1, 1)))
 
+def km_dcgain(sys_obj) -> KheraMATArray:
+    if not isinstance(sys_obj, KheraMATSystem):
+        raise ValueError("Expected a transfer function system created with tf(num, den)")
+    val = signal.freqresp(sys_obj.sys, w=[0])[1][0]
+    return KheraMATArray(float(np.abs(val)))
+
 CONTROL_FUNCTIONS: Dict[str, Callable] = {
     "tf": km_tf,
     "step": km_step,
@@ -99,5 +105,6 @@ CONTROL_FUNCTIONS: Dict[str, Callable] = {
     "bode": km_bode,
     "pole": km_pole,
     "zero": km_zero,
+    "dcgain": km_dcgain,
 }
 
