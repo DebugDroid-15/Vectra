@@ -177,6 +177,22 @@ class KheraMATArray:
         b = other._array if isinstance(other, KheraMATArray) else other
         return KheraMATArray(self._array >= b)
 
+    def __and__(self, other):
+        b = other._array if isinstance(other, KheraMATArray) else other
+        return KheraMATArray(np.logical_and(self._array, b))
+
+    def __rand__(self, other):
+        b = other._array if isinstance(other, KheraMATArray) else other
+        return KheraMATArray(np.logical_and(b, self._array))
+
+    def __or__(self, other):
+        b = other._array if isinstance(other, KheraMATArray) else other
+        return KheraMATArray(np.logical_or(self._array, b))
+
+    def __ror__(self, other):
+        b = other._array if isinstance(other, KheraMATArray) else other
+        return KheraMATArray(np.logical_or(b, self._array))
+
     def __str__(self) -> str:
         if self._array.size == 0:
             r, c = self._array.shape

@@ -175,6 +175,8 @@ class Interpreter:
             elif node.op == '<=': return left <= right
             elif node.op == '>': return left > right
             elif node.op == '>=': return left >= right
+            elif node.op in ('&', '&&'): return left & right
+            elif node.op in ('|', '||'): return left | right
 
         # Fallback for SymPy or generic objects
         if hasattr(right, "_array") and isinstance(right, KheraMATArray):
@@ -194,6 +196,8 @@ class Interpreter:
         elif node.op in ('^', '.^'): return left ** right
         elif node.op == '==': return left == right
         elif node.op == '~=': return left != right
+        elif node.op in ('&', '&&'): return bool(left and right)
+        elif node.op in ('|', '||'): return bool(left or right)
 
         raise InterpreterError(f"Unsupported binary operator '{node.op}'")
 
